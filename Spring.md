@@ -66,30 +66,6 @@ BeanFactory beanFactory = new XmlBeanFactory(new ClassPathResource("applicationC
 
 
 
-###### 3.3 **bean**后处理器
-
-```java
-// 1.注册
-<bean id="beanProcessor" class="org.meify.core.MyBeanPostProcessor"/>
-
-// 2.实现BeanPostProcessor接口
-public class MyBeanPostProcessor implements BeanPostProcessor {
-	@Override
-	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		// 初始化之前进行增强处理
-		return bean;
-	}
- 
-	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		// 初始化之后进行增强处理
-		return bean;
-	}
-}
-```
-
-
-
 ######3.4 bean生命周期
 
 > BeanFactory和ApplicationContext是Spring两种很重要的容器,前者提供了最基本的依赖注入的支持，而后者在继承前者的基础进行了功能的拓展，例如增加了事件传播，资源访问和国际化的消息访问等功能。这里主要介绍了ApplicationContext和BeanFactory两种容器的Bean的生命周期。
@@ -126,6 +102,8 @@ ApplicationContext容器中，Bean的生命周期流程如上图所示，流程�
 
 ```java
 <bean id="person1" destroy-method="myDestroy" init-method="myInit" class="com.test.spring.life.Person">
+@PostConstruct 	// 注解init
+@PreDestroy		// 注解destroy
 ```
 
 
@@ -136,65 +114,49 @@ ApplicationContext容器中，Bean的生命周期流程如上图所示，流程�
 >
 > 然后容器在创建bean时注入依赖项B的过程称为依赖注入。
 
+```java
+// Person 类
+public class Person {
+    // 普通类型注入
+    private String name;
+    private Integer age;
+    private Date  brithday;
+    // 集合类型注入
+    private String[] strings;
+    private List<String> list;
+    private Set <String> set;
+    private Map<String,String> map;
+    private Properties properties;
+    // 构造函数
+    public Person(String name, Integer age, Date brithday) {
+        this.name = name;
+        this.age = age;
+        this.brithday = brithday;
+    }
+}
+```
+
 
 
 ###### 3.5.1 基于构造函数的依赖注入
 
+> <constructor-arg /> 中属性 (type、name、index)选1、(ref、value)选1
+
 ```java
-// 示例1 引用注入
-public class ThingOne {
-    public ThingOne(ThingTwo thingTwo, ThingThree thingThree) {// ...}
-}
-
-<beans>
-    <bean id="beanTwo" class="x.y.ThingTwo"/>
-    <bean id="beanThree" class="x.y.ThingThree"/>
-    <bean id="beanOne" class="x.y.ThingOne">
-    	// 参数注入
-        <constructor-arg ref="beanTwo"/>
-        <constructor-arg ref="beanThree"/>
-    </bean>
-</beans>
-
-// 示例2 普通类型值注入
-public class ExampleBean {
-    private int years;
-    private String ultimateAnswer;
-    // ConstructorProperties 配合3使用
-    @ConstructorProperties({"years", "ultimateAnswer"}) 
-    public ExampleBean(int years, String ultimateAnswer) {
-        this.years = years;
-        this.ultimateAnswer = ultimateAnswer;
-    }
-}
-<bean id="exampleBean" class="examples.ExampleBean">
-    // 1.构造函数参数类型匹配
-    <constructor-arg type="int" value="7500000"/>
-    <constructor-arg type="java.lang.String" value="42"/>
-	// 2.构造函数参数索引
-    <constructor-arg index="0" value="7500000"/>
-    <constructor-arg index="1" value="42"/>
-	// 3.构造函数参数名称 需配合@ConstructorProperties({"years", "ultimateAnswer"}) 使用
-    <constructor-arg name="years" value="7500000"/>
-    <constructor-arg name="ultimateAnswer" value="42"/>
+<bean id="person" class="com.boundless.person.Person">
+        <constructor-arg type="java.lang.String" value="zhangsan"/>
+        <constructor-arg name="age" value="12"/>
+        <constructor-arg index="2" ref="myDate" />
 </bean>
+<bean id="myDate" class="java.util.Date"/>
 
-// 示例3 静态构造函数注入 factory-method=...
-public class ExampleBean {
-    public static ExampleBean createInstance (AnotherBean anotherBean,
-                                              YetAnotherBean yetAnotherBean,
-                                              int i) {
-        ExampleBean eb = new ExampleBean (...);
-        return eb;
-    }
-}    
-<bean id="exampleBean" class="examples.ExampleBean" factory-method="createInstance">
-    <constructor-arg ref="anotherExampleBean"/>
-    <constructor-arg ref="yetAnotherBean"/>
-    <constructor-arg value="1"/>
+// 命名空间
+xmlns:c="http://www.springframework.org/schema/c"
+<bean id="person" class="com.boundless.person.Person"
+    c:name="zhangsan"
+	c:age="20"
+	c:brithday-ref="myDate">
 </bean>
-<bean id="anotherExampleBean" class="examples.AnotherBean"/>
-<bean id="yetAnotherBean" class="examples.YetAnotherBean"/>
 ```
 
 
@@ -211,16 +173,63 @@ public class ExampleBean {
 
 
 
+######1.普通类型注入
+
 ```java
-<bean id="exampleBean" class="examples.ExampleBean">
-    <property name="beanOne">
-        <ref bean="anotherExampleBean"/>
-    </property>
-    <property name="beanTwo" ref="yetAnotherBean"/>
-    <property name="integerProperty" value="1"/>
+<bean id="person" class="com.boundless.person.Person">
+        <property name="age" value="20"/>
+        <property name="brithday" ref="myDate"/>
+        <property name="name" value="alice"/>
 </bean>
 
-<bean id="anotherExampleBean" class="examples.AnotherBean"/>
-<bean id="yetAnotherBean" class="examples.YetAnotherBean"/>
+// 命名空间
+xmlns:p="http://www.springframework.org/schema/p"
+<bean id="person" class="com.boundless.person.Person"
+          p:name="zhangshan"
+          p:age="20"
+          p:brithday-ref="myDate">
+</bean>
 ```
+
+###### 2.集合类型注入
+
+```java
+<bean id="person" class="com.boundless.person.Person">
+            <property name="strings">
+                <array>
+                    <value> aaa</value>
+                </array>
+            </property>
+            <property name="list">
+                <list>
+                    <value> 111</value>
+                </list>
+            </property>
+            <property name="set">
+                <set>
+                    <value>set1</value>
+                </set>
+            </property>
+
+            <property name="map">
+                <map>
+                    <entry key="name" value="张三"/>
+                </map>
+            </property>
+
+            <property name="properties">
+                <props>
+                    <prop key="xiaoli">20</prop>
+                </props>
+            </property>
+
+        </bean>
+</beans>
+```
+
+######  3. `depends-on` 和 `<ref>` 区别
+
+> ref 常用的情况是这个bean作为当前bean的属性
+>
+> depends-on 通常在属于一种不强的依赖。比如A依赖B初始化后的某个Unit.data值,并不正真依赖B对象。
 
