@@ -233,3 +233,78 @@ xmlns:p="http://www.springframework.org/schema/p"
 >
 > depends-on 通常在属于一种不强的依赖。比如A依赖B初始化后的某个Unit.data值,并不正真依赖B对象。
 
+
+
+###### 4.惰性加载Bean
+
+```java
+<bean id="lazy" class="com.something.ExpensiveToCreateBean" lazy-init="true"/>
+
+@Lazy // 注解
+```
+
+###### 5.自动装配
+
+| 模式          | 说明                                                         |
+| ------------- | ------------------------------------------------------------ |
+| `no`          | （默认）无自动装配。Bean引用必须由`ref`元素定义。不建议对较大的部署更改默认设置，因为明确指定协作者可以提供更好的控制和清晰度。在某种程度上，它记录了系统的结构。 |
+| `byName`      | 按属性名称自动装配。Spring查找与需要自动装配的属性同名的bean。例如，如果bean定义按名称设置为autowire并且它包含一个`master`属性（即，它有一个`setMaster(..)`方法），则Spring会查找名为bean的定义`master`并使用它来设置属性。 |
+| `byType`      | 如果容器中只存在一个属性类型的bean，则允许属性自动装配。如果存在多个，则抛出致命异常，这表示您可能不会`byType`对该bean 使用自动装配。如果没有匹配的bean，则不会发生任何事情（该属性未设置）。 |
+| `constructor` | 类似`byType`但适用于构造函数参数。如果容器中没有构造函数参数类型的一个bean，则会引发致命错误。 |
+
+###### 6.方法注入
+
+> spring提供两种机制去注入方法:
+>
+> 1.Lookup method inject只提供返回值注入
+>
+> 2.Arbitrary method replacement可以替换任意方法来达到注入
+
+1. lookup
+
+```java
+public abstract class CommandManager{
+    public Object process(Map commandState) {
+        // 每次使用都调用createCommand去获取一个新实例
+        Command command = createCommand();
+        command.setState(commandState);
+        return command.execute();
+    }
+    /**
+     * Loopup的注释中的写明了需要返回的bean名字，如果没有写bean name，那么会根据createCommand的函数返回值类型去查找对应的bean
+     * @return
+     */
+    @Lookup("command")
+    protected abstract Command createCommand();
+}
+```
+
+2.method replace
+
+```java
+public class ReplacementComputeValue implements MethodReplacer {
+    /**
+     * 当我们替换的方法被调用时，容器就会代理到这里，在这里执行我们要替换的执行逻辑
+     * @param o   替换方法执行时对应的实例
+     * @param m   替换方法
+     * @param args 替换方法执行时传入的参数
+     * @return
+     * @throws Throwable
+     */
+    public Object reimplement(Object o, Method m, Object[] args) throws Throwable {
+        String input = (String) args[0];
+        ...
+        return ...;
+    }
+}
+
+<bean id="myValueCalculator" class="x.y.z.MyValueCalculator">
+    <!-- 需要替换的方法 -->
+    <replaced-method name="computeValue" replacer="replacementComputeValue">
+        <arg-type>String</arg-type>
+    </replaced-method>
+</bean>
+
+<bean id="replacementComputeValue" class="a.b.c.ReplacementComputeValue"/>
+```
+
