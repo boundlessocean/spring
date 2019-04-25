@@ -521,7 +521,7 @@ public class MainConfig {
 * 11. `@Lazy(true)` 表示延迟初始化
 * 12. `@DependsOn`：定义Bean初始化及销毁时的顺序
 * 13. `@Service`业务层组件、 `@Controller`控制层组件、`@Repository` DAO组件、`@Component`泛指组件、`@Named` JSR-330
-
+* 14. `@EnableLoadTimeWeaving` 参考[Load-time Weaving with AspectJ in the Spring Framework](https://docs.spring.io/spring/docs/5.2.0.M1/spring-framework-reference/core.html#aop-aj-ltw)
 
 
 #### 5.组件路径扫描
@@ -553,7 +553,9 @@ public class AppConfig {}
 
 
 
-#### 6.基于Java的容器配置
+#### 6.国际化
+
+<https://blog.csdn.net/sid1109217623/article/details/84065725>
 
 
 
