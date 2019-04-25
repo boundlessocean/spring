@@ -1,4 +1,4 @@
-##Spring
+##Spring Ioc和DI
 
 
 
@@ -307,4 +307,253 @@ public class ReplacementComputeValue implements MethodReplacer {
 
 <bean id="replacementComputeValue" class="a.b.c.ReplacementComputeValue"/>
 ```
+
+
+
+##### 3.6 bean继承
+
+```java
+// 如果 inheritedTestBean 没有class 则不能被实例化，只作为抽象父类Bean使用
+<bean id="inheritedTestBean" abstract="true"
+        class="org.springframework.beans.TestBean">
+    <property name="name" value="parent"/>
+    <property name="age" value="1"/>
+</bean>
+
+<bean id="inheritsWithDifferentClass"
+        class="org.springframework.beans.DerivedTestBean"
+        parent="inheritedTestBean" init-method="initialize">  
+    <property name="name" value="override"/>
+</bean>
+
+```
+
+
+
+#### 4.基于注解的容器配置
+
+* 1. `@Autowired` = `@Inject`（jsr330规范） 默认按Type装配，可以装配成员，方法参数，set方法。如果我们想使用按名称装配，可以结合
+* 2. `@Required` 强制注入对应`@Autowired(required=false) `和阐述中的`Optional`、`@Nullable`
+
+```java
+public class SimpleMovieLister {
+
+    @Autowired
+    public void setMovieFinder1(Optional<MovieFinder> movieFinder) {
+        ...
+    }
+    
+    @Autowired
+    public void setMovieFinder2(@Nullable MovieFinder movieFinder) {
+        ...
+    }
+}
+```
+
+* 3. `@Primary`：自动装配时当出现多个Bean候选者时，被注解为`@Primary`的`Bean`将作为首选者，否则将抛出异常
+
+```java
+@Configuration
+public class MovieConfiguration {
+    @Bean
+    @Primary
+    public MovieCatalog firstMovieCatalog() { ... }
+
+    @Bean
+    public MovieCatalog secondMovieCatalog() { ... }
+}
+
+public class MovieRecommender {
+    @Autowired
+    private MovieCatalog movieCatalog;
+}
+```
+
+* 4. `@Qualifier` 、`@Genre`配合`@Autowired` 存在多个Bean使用
+
+```java
+@Configuration
+public class MovieConfiguration {
+    @Bean
+    @Qualifier("firstMovieCatalog")
+    public MovieCatalog firstMovieCatalog() { ... }
+
+    @Bean
+    @Genre("secondMovieCatalog")
+    public MovieCatalog secondMovieCatalog() { ... }
+}
+
+public class MovieRecommender {
+    @Autowired
+    public void prepare(@Qualifier("firstMovieCatalog")MovieCatalog movieCatalog,
+            CustomerPreferenceDao customerPreferenceDao) {
+        this.movieCatalog = movieCatalog;
+        this.customerPreferenceDao = customerPreferenceDao;
+    }
+    
+    @Autowired
+    public void dosomething(@Genre("secondMovieCatalog")MovieCatalog movieCatalog,
+            CustomerPreferenceDao customerPreferenceDao) {
+        this.movieCatalog = movieCatalog;
+        this.customerPreferenceDao = customerPreferenceDao;
+    }
+}
+```
+
+* 5. `@Resource`的作用相当于`@Autowired`，只不过`@Autowired`按byType自动注入，而`@Resource`默认按 byName自动注入
+
+```java
+@Configuration
+public class MovieConfiguration {
+    @Bean
+    public MovieCatalog firstMovieCatalog() { ... }
+
+    @Bean
+    public MovieCatalog secondMovieCatalog() { ... }
+}
+
+public class MovieRecommender {
+    @Resource("secondMovieCatalog")
+    // @Resource(name="nameA") @Resource(type="A.Class")
+    private MovieCatalog movieCatalog;
+}
+```
+
+* 6. `@Configuration` +配合工厂方法头上`@Bean` = xml 配置的Bean
+
+```java
+@Configuration
+public class MainConfig {
+	public String appid;
+    @Bean
+    public void service() {...}
+}
+```
+
+* 7. `@PostConstruct`、`@Bean(initMethod = "init")`  =（init-method）
+
+     与`@PreDestroy`  、`@Bean(destroyMethod = "cleanup")` =（destroy-method）
+
+```java
+public class CachingMovieLister {
+    @PostConstruct // <bean id="..." class="..." init-method="...">
+    public void populateMovieCache() {...}
+    @PreDestroy // <bean id="..." class="..." destroy-method="...">
+    public void clearMovieCache() {...}
+}
+
+@Configuration
+public class AppConfig {
+    @Bean(initMethod = "init")
+    public BeanOne beanOne() {
+        return new BeanOne();
+    }
+
+    @Bean(destroyMethod = "cleanup")
+    public BeanTwo beanTwo() {
+        return new BeanTwo();
+    }
+}
+```
+
+
+
+* 8. `@PropertySource`、`@Value`
+
+```java
+// 1.普通类型注入
+@Component
+public class Person{
+    @Value("normal")
+    private String normal; // 注入普通字符串
+
+    @Value("#{systemProperties['os.name']}")
+    private String systemPropertiesName; // 注入操作系统属性
+
+    @Value("#{ T(java.lang.Math).random() * 100.0 }")
+    private double randomNumber; //注入表达式结果
+
+    @Value("#{beanInject.another}")
+    private String fromAnotherBean; // 注入其他Bean属性：注入beanInject对象的属性another
+
+    @Value("classpath:com/hry/spring/configinject/config.txt")
+    private Resource resourceFile; // 注入文件资源
+
+    @Value("http://www.baidu.com")
+    private Resource testUrl; // 注入URL资源
+}
+
+// 2. application.propertie文件配置注入
+@PropertySource("classpath:mail.properties")
+// 多个配置时使用
+@PropertySource({"classpath:config/my.properties","classpath:config/config.properties"})
+public class TaskController {
+    @Value("${mail.smtp.auth}")
+    private String userName;
+    
+    @Value("${mail.from}")
+    private String password;
+}
+
+```
+
+
+
+* 9. `@EnableAsync `、` @Async `
+
+```java
+@Configuration
+@EnableAsync 
+public class MainConfig {
+    @Bean
+    public void service() {...}
+    @Async
+    public void do(){...}
+    
+    @Async
+    public String do(){
+       return new AsyncResult<String>("hello world !!!!");
+    }
+}
+```
+
+* 10. `@Scope`注解 参考Bean作用域
+* 11. `@Lazy(true)` 表示延迟初始化
+* 12. `@DependsOn`：定义Bean初始化及销毁时的顺序
+* 13. `@Service`业务层组件、 `@Controller`控制层组件、`@Repository` DAO组件、`@Component`泛指组件、`@Named` JSR-330
+
+
+
+#### 5.组件路径扫描
+
+```java
+// 1.org.example包及子包
+<context:component-scan base-package="org.example"/>  // xml配置, 
+@ComponentScan(basePackages = "org.example")  // 注解 
+    
+// 2.org.example.* 子包
+@ComponentScan(basePackages = "org.example.*")
+    
+// 3.@Filter定义
+@Configuration
+@ComponentScan(basePackages = "org.example",
+        includeFilters = @Filter(type = FilterType.REGEX, pattern = ".*Stub.*Repository"),
+        excludeFilters = @Filter(Repository.class))
+public class AppConfig {}
+
+<beans>
+    <context:component-scan base-package="org.example">
+        <context:include-filter type="regex"
+                expression=".*Stub.*Repository"/>
+        <context:exclude-filter type="annotation"
+                expression="org.springframework.stereotype.Repository"/>
+    </context:component-scan>
+</beans>
+```
+
+
+
+#### 6.基于Java的容器配置
+
+
 
