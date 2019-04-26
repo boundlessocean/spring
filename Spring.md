@@ -1,8 +1,10 @@
-##Spring Ioc和DI
+# Spring Ioc和DI
 
 
 
-####1. Spring Ioc容器和Bean
+[TOC]
+
+### 1. Spring Ioc容器和Bean
 
 > Ioc 控制反转
 
@@ -16,7 +18,7 @@
 
 
 
-####2. Container
+### 2. Container
 
 > `org.springframework.context.ApplicationContext`接口代表Spring IoC容器，容器通过读取XML配置，Java注解或Java代码来实例化对象
 
@@ -32,9 +34,9 @@ BeanFactory beanFactory = new XmlBeanFactory(new ClassPathResource("applicationC
 
 
 
-####3. Bean
+###3. Bean
 
-######3.1 作用域 
+####3.1 作用域
 
 ```java
 <bean id="factory" class="ServiceFactoy" scope="singleton"/> 
@@ -51,7 +53,7 @@ BeanFactory beanFactory = new XmlBeanFactory(new ClassPathResource("applicationC
 
 
 
-###### 3.2  Bean实例化3种方法
+####3.2  Bean实例化3种方法
 
 ```java
 // 1.构造函数实例化（默认）
@@ -66,7 +68,7 @@ BeanFactory beanFactory = new XmlBeanFactory(new ClassPathResource("applicationC
 
 
 
-######3.4 bean生命周期
+####3.4 bean生命周期
 
 > BeanFactory和ApplicationContext是Spring两种很重要的容器,前者提供了最基本的依赖注入的支持，而后者在继承前者的基础进行了功能的拓展，例如增加了事件传播，资源访问和国际化的消息访问等功能。这里主要介绍了ApplicationContext和BeanFactory两种容器的Bean的生命周期。
 
@@ -108,7 +110,7 @@ ApplicationContext容器中，Bean的生命周期流程如上图所示，流程�
 
 
 
-###### 3.5 DI（依赖注入）
+####3.5 DI（依赖注入）
 
 > A中的 成员 (setter注入)、构造函数参数、工厂方法参数 依赖B。
 >
@@ -138,7 +140,7 @@ public class Person {
 
 
 
-###### 3.5.1 基于构造函数的依赖注入
+#####3.5.1 基于构造函数的依赖注入
 
 > <constructor-arg /> 中属性 (type、name、index)选1、(ref、value)选1
 
@@ -161,7 +163,7 @@ xmlns:c="http://www.springframework.org/schema/c"
 
 
 
-###### 3.5.2  基于成员Setter注入
+#####3.5.2  基于成员Setter注入
 
 > 与构造函数参数注入的区别：
 >
@@ -171,9 +173,7 @@ xmlns:c="http://www.springframework.org/schema/c"
 >
 > 3.setter注入可以解决循环注入问题
 
-
-
-######1.普通类型注入
+* 1.普通类型注入
 
 ```java
 <bean id="person" class="com.boundless.person.Person">
@@ -191,7 +191,7 @@ xmlns:p="http://www.springframework.org/schema/p"
 </bean>
 ```
 
-###### 2.集合类型注入
+* 2.集合类型注入
 
 ```java
 <bean id="person" class="com.boundless.person.Person">
@@ -227,15 +227,13 @@ xmlns:p="http://www.springframework.org/schema/p"
 </beans>
 ```
 
-######  3. `depends-on` 和 `<ref>` 区别
+* 3. `depends-on` 和 `<ref>` 区别
 
 > ref 常用的情况是这个bean作为当前bean的属性
 >
 > depends-on 通常在属于一种不强的依赖。比如A依赖B初始化后的某个Unit.data值,并不正真依赖B对象。
 
-
-
-###### 4.惰性加载Bean
+* 4. 惰性加载Bean
 
 ```java
 <bean id="lazy" class="com.something.ExpensiveToCreateBean" lazy-init="true"/>
@@ -243,7 +241,7 @@ xmlns:p="http://www.springframework.org/schema/p"
 @Lazy // 注解
 ```
 
-###### 5.自动装配
+* 5. 自动装配
 
 | 模式          | 说明                                                         |
 | ------------- | ------------------------------------------------------------ |
@@ -252,7 +250,7 @@ xmlns:p="http://www.springframework.org/schema/p"
 | `byType`      | 如果容器中只存在一个属性类型的bean，则允许属性自动装配。如果存在多个，则抛出致命异常，这表示您可能不会`byType`对该bean 使用自动装配。如果没有匹配的bean，则不会发生任何事情（该属性未设置）。 |
 | `constructor` | 类似`byType`但适用于构造函数参数。如果容器中没有构造函数参数类型的一个bean，则会引发致命错误。 |
 
-###### 6.方法注入
+* 6. 方法注入
 
 > spring提供两种机制去注入方法:
 >
@@ -310,7 +308,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 
 
 
-##### 3.6 bean继承
+#####3.6 bean继承
 
 ```java
 // 如果 inheritedTestBean 没有class 则不能被实例化，只作为抽象父类Bean使用
@@ -330,7 +328,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 
 
 
-#### 4.基于注解的容器配置
+###4.基于注解的容器配置
 
 * 1. `@Autowired` = `@Inject`（jsr330规范） 默认按Type装配，可以装配成员，方法参数，set方法。如果我们想使用按名称装配，可以结合
 * 2. `@Required` 强制注入对应`@Autowired(required=false) `和阐述中的`Optional`、`@Nullable`
@@ -524,7 +522,9 @@ public class MainConfig {
 * 14. `@EnableLoadTimeWeaving` 参考[Load-time Weaving with AspectJ in the Spring Framework](https://docs.spring.io/spring/docs/5.2.0.M1/spring-framework-reference/core.html#aop-aj-ltw)
 
 
-#### 5.组件路径扫描
+
+
+###5.组件路径扫描
 
 ```java
 // 1.org.example包及子包
@@ -553,9 +553,11 @@ public class AppConfig {}
 
 
 
-#### 6.本地化
+###6.本地化
 
-###### 6.1本地化工具
+
+
+####6.1本地化工具
 
 java.util包中提供了几个支持本地化的格式化操作工具类：`NumberFormat`、`DateFormat`、`MessageFormat`
 
@@ -591,7 +593,7 @@ String msg2 = mf.format(params);
 
 
 
-###### 6.2 ResourceBoundle
+####6.2 ResourceBoundle
 
 > ResourceBoundle为加载及访问资源文件提供便捷的操作
 
@@ -612,7 +614,7 @@ String str1 = new MessageFormat(rb.getString("greeting.common"),Locale. US).form
 
 
 
-###### 6.3 MessageSource
+####6.3 MessageSource
 
 > spring中定义了一个MessageSource接口，以用于支持信息的国际化和包含参数的信息的替换
 
@@ -690,7 +692,18 @@ public class Hello implements MessageSourceAware {
 	public void setMessageSource(MessageSource messageSource) {
 		this.messageSource = messageSource;
 	}
-
 }
 ```
 
+
+
+###7. `BeanFactory`和 `ApplicationContext`
+
+| 特征                             | BeanFactory | ApplicationContext |
+| -------------------------------- | ----------- | ------------------ |
+| Bean实例化/布线                  | 是          | 是                 |
+| 集成的生命周期管理               | 没有        | 是                 |
+| 自动BeanPostProcessor注册        | 没有        | 是                 |
+| 自动BeanFactoryPostProcessor注册 | 没有        | 是                 |
+| 方便MessageSource访问（内化）    | 没有        | 是                 |
+| 内置ApplicationEvent发布机制     | 没有        | 是                 |
