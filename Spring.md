@@ -553,9 +553,144 @@ public class AppConfig {}
 
 
 
-#### 6.国际化
+#### 6.本地化
 
-<https://blog.csdn.net/sid1109217623/article/details/84065725>
+###### 6.1本地化工具
+
+java.util包中提供了几个支持本地化的格式化操作工具类：`NumberFormat`、`DateFormat`、`MessageFormat`
+
+```java
+// 1.NumberFormat
+NumberFormat currFmt = NumberFormat.getCurrencyInstance(Locale.FRANCE);
+System.out.println(currFmt.format(123456.78));
+// 输出
+123 456,78 €
+```
+
+```java
+// 2.DateFormat
+DateFormat date1 = DateFormat.getDateInstance(DateFormat.MEDIUM,Locale.GERMAN);
+System.out.println(date1.format(new Date()));
+```
+
+```java
+// 3.MessageFormat
+//①信息格式化串
+String pattern1 = "{0}，你好！你于{1}在工商银行存入{2} 元。";
+String pattern2 = "At {1,time,short} On{1,date,long}，{0} paid {2,number, currency}.";
+
+//②用于动态替换占位符的参数
+Object[] params = {"John", new GregorianCalendar().getTime(),1.0E3};
+//③使用默认本地化对象格式化信息
+String msg1 = MessageFormat.format(pattern1,params);
+
+//④使用指定的本地化对象格式化信息
+MessageFormat mf = new MessageFormat(pattern2,Locale.US);
+String msg2 = mf.format(params);
+```
 
 
+
+###### 6.2 ResourceBoundle
+
+> ResourceBoundle为加载及访问资源文件提供便捷的操作
+
+```java
+ResourceBundle rb = ResourceBundle.getBundle("com/pageage/...",  Locale.US)  
+rb.getString("greeting.common") 
+```
+
+`ResourceBundle`   配合  `MessageFormat`
+
+```java
+// .properties 资源文件
+greeting.common=How are you!{0},today is {1}
+
+Object[] params = {"John", new GregorianCalendar().getTime()};
+String str1 = new MessageFormat(rb.getString("greeting.common"),Locale. US).format(params); 
+```
+
+
+
+###### 6.3 MessageSource
+
+> spring中定义了一个MessageSource接口，以用于支持信息的国际化和包含参数的信息的替换
+
+```java
+ public interface MessageSource {
+    String getMessage(String code, Object[] args, String defaultMessage, Locale locale);
+    String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException;
+    String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException;
+    }
+```
+
+```xml
+<!--①注册资源Bean,其Bean名称只能为messageSource ，根据反射机制从BeanDefinitionRegistry中找出名称为“messageSource”-->  
+<bean id="messageSource"   
+      class="org.springframework.context.support.ResourceBundleMessageSource">  
+  <property name="basenames">  
+     <list>  
+       <value>com/baobaotao/i18n/fmt_resource</value>  
+     </list>  
+  </property>  
+</bean>  
+```
+
+```java
+/
+ApplicationContext ctx = new ClassPathXmlApplicationContext("com...");  
+Object[] params = {"John", new GregorianCalendar().getTime()};  
+String str1 = ctx.getMessage("greeting.common",params,Locale.US);  
+String str2 = ctx.getMessage("greeting.morning",params,Locale.CHINA);     
+System.out.println(str1);  
+System.out.println(str2);  
+```
+
+ 注入MessageSource
+
+> 1.直接注入
+
+```xml
+<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+	<property name="basename" value="message"/> 
+</bean> 
+<bean id="hello" class="com.app.Hello">
+	<property name="messageSource" ref="messageSource"/>
+</bean>
+```
+
+```java
+public class Hello { 
+
+	private MessageSource messageSource; 
+	
+	public void doSomething() { 
+		String appName = this.messageSource.getMessage("appName", null, null); 
+		System.out.println(appName); 
+	} 
+	
+	public void setMessageSource(MessageSource messageSource) { 
+		this.messageSource = messageSource; 
+	} 
+}
+```
+
+> 2.实现MessageSourceAware接口
+
+```java
+public class Hello implements MessageSourceAware {
+
+	private MessageSource messageSource;
+	
+	public void doSomething() {
+		String appName = this.messageSource.getMessage("appName", null, null);
+		System.out.println(appName);
+	}
+	
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
+	}
+
+}
+```
 
