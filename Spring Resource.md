@@ -60,3 +60,76 @@ public interface ResourceLoader {
 Resource template = ctx.getResource("some/resource/path/myTemplate.txt");
 ```
 
+#### 4.ApplicationContextAware
+
+>`ApplicationContextAware`接口为实现类提供了applicationContext
+
+```java
+// 接口
+public interface ApplicationContextAware extends Aware {
+    void setApplicationContext(ApplicationContext var1) throws BeansException;
+}
+```
+
+
+
+```java
+// 实现类
+public class Person implements ApplicationContextAware{
+    
+	private ApplicationContext applicationContext;
+    
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+    
+    public void readData() throws IOException {
+        Resource resource = applicationContext.getResource("a.txt");
+        File file = resource.getFile();
+        InputStream inputStream = resource.getInputStream();
+        byte data[] = new byte[(int) file.length()];
+        inputStream.read(data);
+        inputStream.close();
+        System.out.println(new String(data));
+    }
+}
+```
+
+
+
+#### 5.ResourceLoaderAware
+
+> `ResourceLoaderAware`接口为实现类提供了ResourceLoader
+
+```java
+// 接口
+public interface ResourceLoaderAware {   
+  void setResourceLoader(ResourceLoader resourceLoader);
+}
+```
+
+```java
+// 实现类
+public class Person implements ResourceLoaderAware{
+    
+    private ResourceLoader resourceLoader;
+    
+	@Override
+    public void setResourceLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
+    
+    public void readData() throws IOException {
+        Resource resource = this.resourceLoader.getResource("a.txt");
+        File file = resource.getFile();
+        InputStream inputStream = resource.getInputStream();
+        byte data[] = new byte[(int) file.length()];
+        inputStream.read(data);
+        inputStream.close();
+        System.out.println(new String(data));
+    }
+}
+
+```
+
