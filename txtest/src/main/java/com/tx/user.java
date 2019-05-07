@@ -27,6 +27,4 @@ public class user {
         jdbcTemplate.update("update user set userpass = '7654321' where id = 7");
         jdbcTemplate.execute("update user 'userpass' = '123456' where id = 8");
     }
-
-
 }
