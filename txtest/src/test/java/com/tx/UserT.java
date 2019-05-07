@@ -10,6 +10,7 @@ public class UserT {
     public void usert(){
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("META-INF/spring/camel-context.xml");
         user u = applicationContext.getBean("user",user.class);
+        applicationContext.publishEvent(u);
         u.txtest1();
     }
 }

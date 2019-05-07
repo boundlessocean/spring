@@ -315,3 +315,24 @@ public class user {
 
 ```
 
+
+
+
+
+#### 9.事务监听器
+
+从Spring 4.2开始，事件的监听器可以绑定到事务的一个阶段。典型示例是在事务成功完成时处理事件。这样做可以在当前事务的结果对于监听器实际上很重要时更灵活地使用事件。
+
+您可以使用`@EventListener`注释注册常规事件侦听器。如果需要将其绑定到事务，请使用`@TransactionalEventListener`。执行此操作时，默认情况下，侦听器将绑定到事务的提交阶段。
+
+下一个例子显示了这个概念。假设一个组件发布一个订单创建的事件，并且我们想要定义一个只应该在发布它的事务成功提交后才应该处理该事件的监听器。以下示例设置此类事件侦听器：
+
+```java
+@Component
+public class MyComponent {
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleOrderCreatedEvent(CreationEvent<Order> creationEvent) {
+    }
+}
+```
+
