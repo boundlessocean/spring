@@ -1,6 +1,8 @@
 package com.boundless.user;
 
-public class user {
+import java.io.Serializable;
+
+public class user implements Serializable {
     private String username;
     private String userpass;
     private String nickname;

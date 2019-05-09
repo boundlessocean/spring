@@ -9,7 +9,12 @@
 
 
 <mapper namespace="com.boundless.user.userMapper">
-
+    <!--
+    开启当前mapper二级缓存
+    同时User需要实现Serializable 序列化接口,
+    type 指定cache实现类，默认为Mybatis实现类
+    -->
+    <cache type=""/>
 <sql id="idEqual" >
     <where>
         id=#{id}
@@ -17,7 +22,7 @@
 
 </sql>
      <!--
-     #{} 表示占位符
+     #{} 表 示占位符
      可以使用任意字符
      id=#{id}
      -->
