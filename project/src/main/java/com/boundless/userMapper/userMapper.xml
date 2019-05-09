@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--命名空间-->
+
+
+
+<mapper namespace="com.boundless.userMapper.userMapper">
+
+<!--<sql id="idEqual" >-->
+    <!--<where>-->
+        <!--id=#{id}-->
+    <!--</where>-->
+
+<!--</sql>-->
+     <!--
+     #{} 表 示占位符
+     可以使用任意字符
+     id=#{id}
+     <include refid="idEqual"></include>
+     -->
+    <select id="findUserById" parameterType="java.lang.Integer" resultType="com.boundless.user.user">
+        SELECT * from  user where id=#{id}
+    </select>
+
+    <!--
+    ${} 表示拼接 实际为%value%
+    只能使用value接收
+    -->
+    <!--<select id="findUserByName" parameterType="java.lang.String" resultType="user">-->
+        <!--select * from user where username like '%${value}%'-->
+    <!--</select>-->
+
+
+    <!--<insert id="insertUser" parameterType="user">-->
+        <!--insert into user(id,username,userpass,nickname) value(#{id},#{username},#{userpass},#{nickname})-->
+    <!--</insert>-->
+
+    <!--<update id="updateUser" parameterType="user">-->
+        <!--update user set username = #{username} where id = #{id}-->
+    <!--</update>-->
+
+    <!--<delete id="deleteUser" parameterType="java.lang.Integer">-->
+        <!--delete from user where id = #{id}-->
+    <!--</delete>-->
+</mapper>

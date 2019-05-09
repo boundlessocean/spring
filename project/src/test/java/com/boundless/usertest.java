@@ -9,8 +9,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import com.boundless.user.userMapper;
-import java.util.List;
+import com.boundless.userMapper.userMapper;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class usertest {
 
@@ -51,5 +52,15 @@ public class usertest {
 //        userMapper.insertUser(u);
         session.commit();
         session.close();
+    }
+
+
+    @Test
+    public void xmlTest(){
+        ApplicationContext context = new  ClassPathXmlApplicationContext("META-INF/spring/app.xml");
+        userMapper mapper = context.getBean("userMapper",userMapper.class);
+        user u = mapper.findUserById(4);
+        System.out.println(u);
+
     }
 }
