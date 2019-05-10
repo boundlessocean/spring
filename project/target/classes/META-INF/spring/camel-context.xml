@@ -8,7 +8,7 @@
 
 
   <properties resource="db.properties">
-    <!--<property name="org.apache.ibatis.parsing.PropertyParser.enable-default-value" value="true"/>-->
+    <property name="org.apache.ibatis.parsing.PropertyParser.enable-default-value" value="true"/>
     <!--<property name="jdbc.username" value="root"/>-->
   </properties>
 

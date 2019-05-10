@@ -8,11 +8,11 @@
 
 
 
-###2.Mybatis xml配置
+###2.Mybatis xml配置 
 
 > MyBatis 的配置文件包含了会深深影响 MyBatis 行为的设置和属性信息。
 
-在不使用Spring整合的情况下，对Mybatis xml配置如下（在整合Spring后 environments 不需要配置）
+在不使用Spring整合的情况下，对Mybatis xml配置如下（在整合Spring后  这里的所有配置都可在 Spring XML中完成）
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -330,9 +330,821 @@ dataSource 元素使用标准的 JDBC 数据源接口来配置 JDBC 连接对象
 
 
 
-http://www.mybatis.org/mybatis-3/zh/configuration.html>
+### 3. XML映射文件（mapper.xml） 
+
+> MyBatis 的真正强大在于它的映射语句，这是它的魔力所在。由于它的异常强大，映射器的 XML 文件就显得相对简单。如果拿它跟具有相同功能的 JDBC 代码进行对比，你会立即发现省掉了将近 95% 的代码。MyBatis 为聚焦于 SQL 而构建，以尽可能地为你减少麻烦。
 
 
 
-<http://www.mybatis.org/spring/zh/using-api.html>
+mapper.xml 映射文件只有很少的几个顶级元素（按照应被定义的顺序列出）：
 
+- `cache` – 对给定命名空间的缓存配置。
+- `cache-ref` – 对其他命名空间缓存配置的引用。
+- `resultMap` – 是最复杂也是最强大的元素，用来描述如何从数据库结果集中来加载对象。
+- `sql` – 可被其他语句引用的可重用语句块。
+- `insert` – 映射插入语句
+- `update` – 映射更新语句
+- `delete` – 映射删除语句
+- `select` – 映射查询语句
+
+
+
+一个包含所有元素的mapper.xml
+
+```xml
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--命名空间-->
+<mapper namespace="com.boundless.userMapper.userMapper">
+    <!-- 启用全局的二级缓存 -->
+    <cache/>
+	<cache-ref namespace="com.someone.application.data.SomeMapper"/>
+    
+    <resultMap id="userResultMap" type="User">
+ 	 	<result property="username" column="username"/>
+        <result property="userpass" column="userpass"/>
+        <result property="nickname" column="nickname"/>
+        <result property="id" column="id"/>
+	</resultMap>
+    
+    <sql id="idEqual">
+        <where>
+            id=#{id}
+        </where>
+	</sql>
+    
+    <select id="findUserById" parameterType="int" resultMap="userResultMap">
+        SELECT * from  user 
+        <include refid="idEqual"></include>
+    </select>
+</mapper> 
+```
+
+
+
+###### 3.1 insert、update、delete、insert
+
+
+
+| 属性               | 描述                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| `id`               | 命名空间中的唯一标识符，可被用来代表这条语句。               |
+| `parameterType`    | 将要传入语句的参数的完全限定类名或别名。这个属性是可选的，因为 MyBatis 可以通过类型处理器推断出具体传入语句的参数，默认值为未设置（unset）。 |
+| `flushCache`       | 将其设置为 true 后，只要语句被调用，都会导致本地缓存和二级缓存被清空，默认值：true（对于 insert、update 和 delete 语句）。 |
+| `timeout`          | 这个设置是在抛出异常之前，驱动程序等待数据库返回请求结果的秒数。默认值为未设置（unset）（依赖驱动）。 |
+| `statementType`    | STATEMENT，PREPARED 或 CALLABLE 的一个。这会让 MyBatis 分别使用 Statement，PreparedStatement 或 CallableStatement，默认值：PREPARED。 |
+| `useGeneratedKeys` | （仅对 insert 和 update 有用）这会令 MyBatis 使用 JDBC 的 getGeneratedKeys 方法来取出由数据库内部生成的主键（比如：像 MySQL 和 SQL Server 这样的关系数据库管理系统的自动递增字段），默认值：false。 对于不支持自动生成类型的数据库或可能不支持自动生成主键的 JDBC 驱动，MyBatis 使用这种方法来生成主键。 |
+| `keyProperty`      | （仅对 insert 和 update 有用）唯一标记一个属性，MyBatis 会通过 getGeneratedKeys 的返回值或者通过 insert 语句的 selectKey 子元素设置它的键值，默认值：未设置（`unset`）。如果希望得到多个生成的列，也可以是逗号分隔的属性名称列表。 |
+| `keyColumn`        | （仅对 insert 和 update 有用）通过生成的键值设置表中的列名，这个设置仅在某些数据库（像 PostgreSQL）是必须的，当主键列不是表中的第一列的时候需要设置。如果希望使用多个生成的列，也可以设置为逗号分隔的属性名称列表 |
+
+```xml
+<insert
+  id="insertAuthor"
+  parameterType="domain.blog.Author"
+  flushCache="true"
+  statementType="PREPARED"
+  keyProperty="id"
+  keyColumn="1"
+  useGeneratedKeys="true"
+  timeout="20">
+```
+
+多行插入
+
+```xml
+<insert id="insertAuthor" useGeneratedKeys="true"
+    keyProperty="id">
+  insert into Author (username, password, email, bio) values
+  <foreach item="item" collection="list" separator=",">
+    (#{item.username}, #{item.password}, #{item.email}, #{item.bio})
+  </foreach>
+</insert>
+```
+
+
+
+######3.2 参数 parameterType
+
+```xml
+<!--
+ #{}占位符
+ 如果是java基本类型可以使用任意字符
+ 如果是自定义对象类型，对象属性名必须和内容匹配
+ id=#{id}
+ -->
+<select id="findUserById" parameterType="java.lang.Integer" resultType="com.boundless.user.user">
+    SELECT * from  user where id=#{id}
+</select>
+
+<insert id="insertUser" parameterType="User">
+  insert into users (id, username, password)
+  values (#{id}, #{username}, #{password})
+</insert>
+<!--
+${} 表示拼接
+只能使用value接收
+-->
+<select id="findUserByName" parameterType="java.lang.String" resultType="user">
+    select * from user where username like '%${value}%'
+</select>
+
+```
+
+
+
+###### 3.3 结果映射resultType
+
+示例1:
+
+```xml
+<select id="findUserById" parameterType="java.lang.Integer" resultType="com.boundless.user.user">
+    SELECT
+     *,car_name as carname
+     from  user where id=#{id}
+</select>
+```
+
+######3.4 结果映射resultMap
+
+示例2：
+
+```xml
+<resultMap id="userResult" type="com.boundless.user.user">
+    <result property="carname" column="car_name"/>
+</resultMap>
+
+<select id="findUserById" parameterType="int" resultMap="userResult">
+    SELECT * from user where id=#{id}
+</select>
+```
+
+示例1等同与示例2，Mybatis会按照user 的属性映射出一个resultMap
+
+resultMap 内可用标签
+
+- constructor
+
+  \- 用于在实例化类时，注入结果到构造方法中
+
+  - `idArg` - ID 参数；标记出作为 ID 的结果可以帮助提高整体性能
+  - `arg` - 将被注入到构造方法的一个普通结果
+
+- `id` – 一个 ID 结果；标记出作为 ID 的结果可以帮助提高整体性能
+
+- `result` – 注入到字段或 JavaBean 属性的普通结果
+
+- association
+
+  – 一个复杂类型的关联；许多结果将包装成这种类型
+
+  - 嵌套结果映射 – 关联本身可以是一个 `resultMap` 元素，或者从别处引用一个
+
+- collection
+
+  – 一个复杂类型的集合
+
+  - 嵌套结果映射 – 集合本身可以是一个 `resultMap` 元素，或者从别处引用一个
+
+- discriminator
+
+  – 使用结果值来决定使用哪个resultMap
+
+  - case
+
+    – 基于某些值的结果映射
+
+    - 嵌套结果映射 – `case` 本身可以是一个 `resultMap` 元素，因此可以具有相同的结构和元素，或者从别处引用一个
+
+**3.4.1 constructor**构造器
+
+```java
+public class User {
+   public User(Integer id, String username, int age) {
+  }
+}
+```
+
+```xml
+<constructor>
+   <idArg column="id" javaType="int"/>
+   <arg column="username" javaType="String"/>
+   <arg column="age" javaType="_int"/>
+</constructor>
+```
+
+
+
+**3.4.2 association**关联
+
+指定属性
+
+```xml
+<resultMap id="blogResult" type="Blog">
+  <id property="id" column="blog_id" />
+  <result property="title" column="blog_title"/>
+  <association property="author" javaType="Author">
+    <id property="id" column="author_id"/>
+    <result property="username" column="author_username"/>
+    <result property="password" column="author_password"/>
+    <result property="email" column="author_email"/>
+    <result property="bio" column="author_bio"/>
+  </association>
+</resultMap>
+```
+
+或者指定resultMap
+
+```xml
+<resultMap id="blogResult" type="Blog">
+  <id property="id" column="blog_id" />
+  <result property="title" column="blog_title"/>
+  <association property="author" column="blog_author_id" javaType="Author" resultMap="authorResult"/>
+</resultMap>
+
+<resultMap id="authorResult" type="Author">
+  <id property="id" column="author_id"/>
+  <result property="username" column="author_username"/>
+  <result property="password" column="author_password"/>
+  <result property="email" column="author_email"/>
+  <result property="bio" column="author_bio"/>
+</resultMap>
+```
+
+那如果博客（blog）有一个共同作者（co-author）该怎么办？select 语句看起来会是这样的：
+
+```xml
+<select id="selectBlog" resultMap="blogResult">
+  select
+    B.id            as blog_id,
+    B.title         as blog_title,
+    A.id            as author_id,
+    A.username      as author_username,
+    A.password      as author_password,
+    A.email         as author_email,
+    A.bio           as author_bio,
+    CA.id           as co_author_id,
+    CA.username     as co_author_username,
+    CA.password     as co_author_password,
+    CA.email        as co_author_email,
+    CA.bio          as co_author_bio
+  from Blog B
+  left outer join Author A on B.author_id = A.id
+  left outer join Author CA on B.co_author_id = CA.id
+  where B.id = #{id}
+</select>
+```
+
+回忆一下，Author 的结果映射定义如下：
+
+```xml
+<resultMap id="authorResult" type="Author">
+  <id property="id" column="author_id"/>
+  <result property="username" column="author_username"/>
+  <result property="password" column="author_password"/>
+  <result property="email" column="author_email"/>
+  <result property="bio" column="author_bio"/>
+</resultMap>
+```
+
+由于结果中的列名与结果映射中的列名不同。你需要指定 `columnPrefix` 以便重复使用该结果映射来映射 co-author 的结果。
+
+```xml
+<resultMap id="blogResult" type="Blog">
+  <id property="id" column="blog_id" />
+  <result property="title" column="blog_title"/>
+  <association property="author"
+    resultMap="authorResult" />
+  <association property="coAuthor"
+    resultMap="authorResult"
+    columnPrefix="co_" />
+</resultMap>
+```
+
+**3.4.3 集合**
+
+```xml
+<resultMap id="blogResult" type="Blog">
+  <id property="id" column="blog_id" />
+  <result property="title" column="blog_title"/>
+  <collection property="posts" ofType="Post">
+    <id property="id" column="post_id"/>
+    <result property="subject" column="post_subject"/>
+    <result property="body" column="post_body"/>
+  </collection>
+</resultMap>
+```
+
+
+
+**3.4.4 鉴别器**
+
+有时候，一个数据库查询可能会返回多个不同的结果集（但总体上还是有一定的联系的）。 鉴别器（discriminator）元素就是被设计来应对这种情况的，另外也能处理其它情况，例如类的继承层次结构。 鉴别器的概念很好理解——它很像 Java 语言中的 switch 语句。
+
+```xml
+<resultMap id="vehicleResult" type="Vehicle">
+  <id property="id" column="id" />
+  <result property="vin" column="vin"/>
+  <result property="year" column="year"/>
+  <discriminator javaType="int" column="vehicle_type">
+    <case value="1" resultMap="carResult"/>
+    <case value="2" resultMap="truckResult"/>
+    <case value="3" resultMap="vanResult"/>
+    <case value="4" resultMap="suvResult"/>
+  </discriminator>
+</resultMap>
+```
+
+或者
+
+```xml
+<resultMap id="vehicleResult" type="Vehicle">
+  <id property="id" column="id" />
+  <result property="vin" column="vin"/>
+  <result property="year" column="year"/>
+  <discriminator javaType="int" column="vehicle_type">
+    <case value="1" resultType="carResult">
+      <result property="doorCount" column="door_count" />
+    </case>
+    <case value="2" resultType="truckResult">
+      <result property="boxSize" column="box_size" />
+      <result property="extendedCab" column="extended_cab" />
+    </case>
+    <case value="3" resultType="vanResult">
+      <result property="powerSlidingDoor" column="power_sliding_door" />
+    </case>
+    <case value="4" resultType="suvResult">
+      <result property="allWheelDrive" column="all_wheel_drive" />
+    </case>
+  </discriminator>
+</resultMap>
+```
+
+
+
+######3.5 sql片段
+
+> 用来定义可重用的 SQL 代码段，这些 SQL 代码可以被包含在其他语句中
+
+```Xml
+<sql id="idEqual">
+    <where>
+        id=#{id}
+    </where>
+</sql>
+
+<select id="findUserById" parameterType="int" resultMap="userResultMap">
+    SELECT * from  user 
+    <include refid="idEqual"></include>
+</select>
+```
+
+
+
+###### 3.6 cache缓存
+
+默认情况下，只启用了本地的会话缓存，它仅仅对一个会话中的数据进行缓存。 要启用全局的二级缓存，只需要在你的 SQL 映射文件中添加一行：
+
+```
+<cache/>
+```
+
+基本上就是这样。这个简单语句的效果如下:
+
+- 映射语句文件中的所有 select 语句的结果将会被缓存。
+- 映射语句文件中的所有 insert、update 和 delete 语句会刷新缓存。
+- 缓存会使用最近最少使用算法（LRU, Least Recently Used）算法来清除不需要的缓存。
+- 缓存不会定时进行刷新（也就是说，没有刷新间隔）。
+- 缓存会保存列表或对象（无论查询方法返回哪种）的 1024 个引用。
+- 缓存会被视为读/写缓存，这意味着获取到的对象并不是共享的，可以安全地被调用者修改，而不干扰其他调用者或线程所做的潜在修改。
+
+提示 缓存只作用于 cache 标签所在的映射文件中的语句。如果你混合使用 Java API 和 XML 映射文件，在共用接口中的语句将不会被默认缓存。你需要使用 @CacheNamespaceRef 注解指定缓存作用域。
+
+这些属性可以通过 cache 元素的属性来修改。比如：
+
+```xml
+<cache
+  eviction="FIFO"
+  flushInterval="60000"
+  size="512"
+  readOnly="true"/>
+```
+
+这个更高级的配置创建了一个 FIFO 缓存，每隔 60 秒刷新，最多可以存储结果对象或列表的 512 个引用，而且返回的对象被认为是只读的，因此对它们进行修改可能会在不同线程中的调用者产生冲突。
+
+可用的清除策略有：
+
+- `LRU` – 最近最少使用：移除最长时间不被使用的对象。
+- `FIFO` – 先进先出：按对象进入缓存的顺序来移除它们。
+- `SOFT` – 软引用：基于垃圾回收器状态和软引用规则移除对象。
+- `WEAK` – 弱引用：更积极地基于垃圾收集器状态和弱引用规则移除对象。
+
+默认的清除策略是 LRU。
+
+
+
+###### 3.7 cache-ref
+
+对某一命名空间的语句，只会使用该命名空间的缓存进行缓存或刷新。 但你可能会想要在多个命名空间中共享相同的缓存配置和实例。要实现这种需求，你可以使用 cache-ref 元素来引用另一个缓存。
+
+```xml
+<cache-ref namespace="com.someone.application.data.SomeMapper"/>
+```
+
+
+
+######3.8动态SQL
+
+- if
+- choose (when, otherwise)
+- trim (where, set)
+- foreach
+- bind
+
+
+
+**3.8.1 if**
+
+```xml
+<select id="findActiveBlogLike"
+     resultType="Blog">
+  SELECT * FROM BLOG
+  WHERE
+  <if test="state != null">
+    state = #{state}
+  </if>
+  <if test="title != null">
+    AND title like #{title}
+  </if>
+  <if test="author != null and author.name != null">
+    AND author_name like #{author.name}
+  </if>
+</select>
+```
+
+
+
+**3.8.2 choose, when, otherwise**
+
+```xml
+<select id="findActiveBlogLike"
+     resultType="Blog">
+  SELECT * FROM BLOG WHERE state = ‘ACTIVE’
+  <choose>
+    <when test="title != null">
+      AND title like #{title}
+    </when>
+    <when test="author != null and author.name != null">
+      AND author_name like #{author.name}
+    </when>
+    <otherwise>
+      AND featured = 1
+    </otherwise>
+  </choose>
+</select>
+```
+
+
+
+**3.8.3 trim, where, set**
+
+3.8.1中的,如果这些条件没有一个能匹配上会发生什么？最终这条 SQL 会变成这样：
+
+```
+SELECT * FROM BLOG
+WHERE
+```
+
+这会导致查询失败。如果仅仅第二个条件匹配又会怎样？这条 SQL 最终会是这样:
+
+```
+SELECT * FROM BLOG
+WHERE
+AND title like ‘someTitle’
+```
+
+使用where来解决这个问题
+
+```xml
+<select id="findActiveBlogLike"
+     resultType="Blog">
+  SELECT * FROM BLOG
+  <where>
+    <if test="state != null">
+         state = #{state}
+    </if>
+    <if test="title != null">
+        AND title like #{title}
+    </if>
+    <if test="author != null and author.name != null">
+        AND author_name like #{author.name}
+    </if>
+  </where>
+</select>
+```
+
+同样set用来解决 update中的if
+
+```xml
+<update id="updateAuthorIfNecessary">
+  update Author
+    <set>
+      <if test="username != null">username=#{username},</if>
+      <if test="password != null">password=#{password},</if>
+      <if test="email != null">email=#{email},</if>
+      <if test="bio != null">bio=#{bio}</if>
+    </set>
+  where id=#{id}
+</update>
+```
+
+
+
+**3.8.4 foreach**
+
+动态 SQL 的另外一个常用的操作需求是对一个集合进行遍历，通常是在构建 IN 条件语句的时候。比如：
+
+```Xml
+<select id="selectPostIn" resultType="domain.blog.Post">
+  SELECT *
+  FROM POST P
+  WHERE ID in
+  <foreach item="item" index="index" collection="list"
+      open="(" separator="," close=")">
+        #{item}
+  </foreach>
+</select>
+```
+
+
+
+**3.8.5 bind**
+
+`bind` 元素可以从 OGNL 表达式中创建一个变量并将其绑定到上下文。比如：
+
+```xml
+<select id="selectBlogsLike" resultType="Blog">
+  <bind name="pattern" value="'%' + _parameter.getTitle() + '%'" />
+  SELECT * FROM BLOG
+  WHERE title LIKE #{pattern}
+</select>
+```
+
+
+
+### 4. 映射文件（mapper.java）
+
+首先mapper.xml文件命名空间必须指定为mapper.java的位置
+
+```xml
+<mapper namespace="com.boundless.userMapper.userMapper">
+    <select id="findUserById" parameterType="java.lang.Integer" resultType="com.boundless.user.user">
+        SELECT * from  user where id=#{id}
+	</select>
+    <select id="findUserByName" parameterType="java.lang.String" resultType="user">
+        select * from user where username like '%${value}%'
+    </select>
+</mapper>
+```
+
+mapper.java中的入参、返回类型、方法名称必须和mapper.xml中一致
+
+```java
+public interface userMapper {
+    public user findUserById(int i);
+	public List<user> findUserByName(String name);
+}
+```
+
+
+
+### 5. entity
+
+```java
+public class user implements Serializable {
+    private String username;
+    private String userpass;
+    private String nickname;
+    private String carname;
+    private int id;
+
+    public String getCarname() { return carname;}
+    
+    public void setCarname(String carname) { this.carname = carname;}
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getUserpass() {
+        return userpass;
+    }
+
+    public void setUserpass(String userpass) {
+        this.userpass = userpass;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "user{" +
+                "username='" + username + '\'' +
+                ", userpass='" + userpass + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", carname='" + carname + '\'' +
+                ", id=" + id +
+                '}';
+    }
+}
+```
+
+
+
+### 6.整合Spring （xml配置）
+
+```Xml
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder location="db.properties"/>
+
+    <!-- 1.数据源配置-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!--2.sqlSessionFactory配置-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!--mybatis配置，可不设置-->
+        <property name="configLocation" value="META-INF/spring/camel-context.xml"/>
+    </bean>
+
+    <!--3.Mapper扫描配置-->
+    
+    <!--<bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">-->
+        <!--<property name="mapperInterface" value="com.boundless.userMapper.userMapper"/>-->
+        <!--<property name="sqlSessionFactory" ref="sqlSessionFactory"/>-->
+    <!--</bean>-->
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.boundless"/>
+         <!-- 可以不设置 -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+    
+
+</beans>
+```
+
+
+
+###### 6.1 SqlSessionFactoryBean
+
+> 在基础的 MyBatis 用法中，是通过 `SqlSessionFactoryBuilder` 来创建 `SqlSessionFactory` 的。 而在 MyBatis-Spring 中，则使用 `SqlSessionFactoryBean` 来创建。
+
+要创建工厂 bean，将下面的代码放到 Spring 的 XML 配置文件中：
+
+```xml
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+  <property name="dataSource" ref="dataSource" />
+</bean>
+```
+
+org.apache.ibatis.session.Configuration 源码
+
+```java
+public class Configuration {
+    protected Environment environment;
+    protected boolean safeRowBoundsEnabled;
+    protected boolean safeResultHandlerEnabled;
+    protected boolean mapUnderscoreToCamelCase;
+    protected boolean aggressiveLazyLoading;
+    protected boolean multipleResultSetsEnabled;
+    protected boolean useGeneratedKeys;
+    protected boolean useColumnLabel;
+    protected boolean cacheEnabled;
+    protected boolean callSettersOnNulls;
+    protected boolean useActualParamName;
+    protected boolean returnInstanceForEmptyRow;
+    protected String logPrefix;
+    protected Class<? extends Log> logImpl;
+    protected Class<? extends VFS> vfsImpl;
+    protected LocalCacheScope localCacheScope;
+    protected JdbcType jdbcTypeForNull;
+    protected Set<String> lazyLoadTriggerMethods;
+    protected Integer defaultStatementTimeout;
+    protected Integer defaultFetchSize;
+    protected ExecutorType defaultExecutorType;
+    protected AutoMappingBehavior autoMappingBehavior;
+    protected AutoMappingUnknownColumnBehavior autoMappingUnknownColumnBehavior;
+    protected Properties variables;
+    protected ReflectorFactory reflectorFactory;
+    protected ObjectFactory objectFactory;
+    protected ObjectWrapperFactory objectWrapperFactory;
+    protected boolean lazyLoadingEnabled;
+    protected ProxyFactory proxyFactory;
+    protected String databaseId;
+    protected Class<?> configurationFactory;
+    protected final MapperRegistry mapperRegistry;
+    protected final InterceptorChain interceptorChain;
+    protected final TypeHandlerRegistry typeHandlerRegistry;
+    protected final TypeAliasRegistry typeAliasRegistry;
+    protected final LanguageDriverRegistry languageRegistry;
+    protected final Map<String, MappedStatement> mappedStatements;
+    protected final Map<String, Cache> caches;
+    protected final Map<String, ResultMap> resultMaps;
+    protected final Map<String, ParameterMap> parameterMaps;
+    protected final Map<String, KeyGenerator> keyGenerators;
+    protected final Set<String> loadedResources;
+    protected final Map<String, XNode> sqlFragments;
+    protected final Collection<XMLStatementBuilder> incompleteStatements;
+    protected final Collection<CacheRefResolver> incompleteCacheRefs;
+    protected final Collection<ResultMapResolver> incompleteResultMaps;
+    protected final Collection<MethodResolver> incompleteMethods;
+    protected final Map<String, String> cacheRefMap;
+}
+```
+
+自 1.3.0 版本开始，新增的 `configuration` 属性能够在没有对应的 MyBatis XML 配置文件的情况下，直接设置 `Configuration` 实例。例如：
+
+```xml
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+  <property name="dataSource" ref="dataSource" />
+  <property name="configuration">
+    <bean class="org.apache.ibatis.session.Configuration">
+      <property name="cacheEnabled" value="true"/>
+    </bean>
+  </property>
+</bean>
+```
+
+
+
+
+
+###### 6.2 Mapper扫描配置
+
+1.注册单个mapper
+
+```xml
+<bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+    <property name="mapperInterface" value="com.boundless.userMapper.userMapper"/>
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+</bean>
+```
+
+2.批量扫描
+
+```xml
+<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    <property name="basePackage" value="com.boundless"/>
+     <!--可不配置，当你需要使用多个数据源时才需要配置此项-->
+    <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+</bean>
+```
+
+3.批量扫描，与2效果相同
+
+```xml
+<mybatis:scan base-package="com.boundless" factory-ref="sqlSessionFactory"/>
+```
+
+
+
+### 7.使用
+
+```java
+ApplicationContext context = new  ClassPathXmlApplicationContext("META-INF/spring/app.xml");
+userMapper mapper = context.getBean("userMapper",userMapper.class);
+user u = mapper.findUserById(6);
+```

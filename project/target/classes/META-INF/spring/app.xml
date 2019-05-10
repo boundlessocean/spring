@@ -3,10 +3,11 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
-        https://www.springframework.org/schema/context/spring-context.xsd">
+        https://www.springframework.org/schema/context/spring-context.xsd http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd">
 
 
     <context:property-placeholder location="db.properties"/>
@@ -29,11 +30,12 @@
         <!--<property name="sqlSessionFactory" ref="sqlSessionFactory"/>-->
     <!--</bean>-->
 
-    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.boundless"/>
-        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
-    </bean>
+    <!--<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">-->
+        <!--<property name="basePackage" value="com.boundless"/>-->
+        <!--<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />-->
+    <!--</bean>-->
 
+    <mybatis:scan base-package="com.boundless" factory-ref="sqlSessionFactory"/>
 
 
 

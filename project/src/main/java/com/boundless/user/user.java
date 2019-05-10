@@ -6,7 +6,12 @@ public class user implements Serializable {
     private String username;
     private String userpass;
     private String nickname;
+    private String carname;
     private int id;
+
+    public String getCarname() { return carname;}
+
+    public void setCarname(String carname) { this.carname = carname;}
 
     public String getUsername() {
         return username;
@@ -46,8 +51,8 @@ public class user implements Serializable {
                 "username='" + username + '\'' +
                 ", userpass='" + userpass + '\'' +
                 ", nickname='" + nickname + '\'' +
+                ", carname='" + carname + '\'' +
                 ", id=" + id +
                 '}';
     }
-
 }

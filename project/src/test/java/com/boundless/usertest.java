@@ -59,7 +59,7 @@ public class usertest {
     public void xmlTest(){
         ApplicationContext context = new  ClassPathXmlApplicationContext("META-INF/spring/app.xml");
         userMapper mapper = context.getBean("userMapper",userMapper.class);
-        user u = mapper.findUserById(4);
+        user u = mapper.findUserById(6);
         System.out.println(u);
 
     }
