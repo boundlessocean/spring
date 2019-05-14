@@ -46,5 +46,12 @@
     <input type="submit" value="保存用户"/>
 </form>
 
+
+<form action="/person/fileupload" method="post" enctype="multipart/form-data">
+    名称: <input type="text" name="imageName"/> <br/>
+    图片: <input type="file" name="uploadFile"/> <br/>
+    <input type="submit" value="上传"/> <br/>
+</form>
+
 </body>
 </html>

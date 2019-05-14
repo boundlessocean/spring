@@ -130,7 +130,7 @@ public interface TransactionDefinition {
 6. **PROPAGATION_NEVER **：never，从不。如果A有事务，B将抛异常；如果A没有事务，B将以非事务执行。
 7. **PROPAGATION_NESTED** ：nested ，嵌套。A和B底层采用保存点机制，形成嵌套事务。
 
- 
+
 
 ######6.2 IsolationLevel 隔离级别
 
@@ -213,7 +213,7 @@ public interface TransactionDefinition {
 <!-- 3.事务管理 -->                                                 
 <bean id="tx" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource"/>
-    </bean>
+</bean>
   
 <!-- 4.事务管理模版 --> 
 <bean id="txtemp" class="org.springframework.transaction.support.TransactionTemplate">
