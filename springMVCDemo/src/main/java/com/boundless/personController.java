@@ -13,9 +13,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -156,8 +158,7 @@ public class personController {
 //            file.mkdirs();
 //        }
 
-
-
+//        DispatcherServlet
 
         String fileName = uploadFile.getOriginalFilename();
         fileName = UUID.randomUUID().toString().replace("-","").toUpperCase() + fileName;
