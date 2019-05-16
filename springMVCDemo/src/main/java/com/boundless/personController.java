@@ -12,9 +12,10 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.*;
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -32,7 +33,7 @@ import java.util.logging.SimpleFormatter;
 @RequestMapping("person")
 public class personController {
 
-    @RequestMapping("name")
+    @RequestMapping("hello")
     public String getPersonName(){
         return "name";
     }
@@ -171,6 +172,16 @@ public class personController {
         System.out.println(result);
 //        uploadFile.transferTo(new File(file,fileName));
 
+//        ResourceHttpRequestHandler
+//        DispatcherServlet
+
+
+
+//        View
+//        HandlerAdapter
+//        HandlerMapping
+//        ViewResolver
+        WebApplicationContext
         return "success";
     }
 

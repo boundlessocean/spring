@@ -25,7 +25,7 @@
 </form>
 
 
-<a href="person/name">查看用户</a>
+<a href="person/hello">查看用户</a>
 <a href="person/name/1">查看用户1</a>
 
 <form method="post" action="/person/responseBody">
