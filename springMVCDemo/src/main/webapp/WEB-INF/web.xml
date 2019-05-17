@@ -4,25 +4,26 @@
 
 <web-app>
 
-  <servlet>
-    <servlet-name>DispatcherServlet</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+  <!--<servlet>-->
+    <!--<servlet-name>DispatcherServlet</servlet-name>-->
+    <!--<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>-->
+      <!--&lt;!&ndash;    springmvc配置文件位置&ndash;&gt;-->
+      <!--<init-param>-->
+        <!--<param-name>contextClass</param-name>-->
+        <!--<param-value>com.boundless.Config</param-value>-->
+          <!--<param-name>contextConfigLocation</param-name>-->
+          <!--<param-value>WEB-INF/DispatcherServlet-servlet.xml</param-value>-->
+      <!--</init-param>-->
+      <!--&lt;!&ndash;     servlet 加载启动&ndash;&gt;-->
+      <!--<load-on-startup>1</load-on-startup>-->
 
-      <!--    springmvc配置文件位置-->
-      <init-param>
-          <param-name>contextConfigLocation</param-name>
-          <param-value>classpath:resources/META-INF/spring/springmvc.xml</param-value>
-      </init-param>
-      <!--     servlet 加载启动-->
-      <load-on-startup>1</load-on-startup>
-      
-  </servlet>
+  <!--</servlet>-->
 
-  <servlet-mapping>
-    <servlet-name>DispatcherServlet</servlet-name>
-    <url-pattern>/</url-pattern>
-  </servlet-mapping>
-  
+  <!--<servlet-mapping>-->
+    <!--<servlet-name>DispatcherServlet</servlet-name>-->
+    <!--<url-pattern>/</url-pattern>-->
+  <!--</servlet-mapping>-->
+
   <display-name>Archetype Created Web Application</display-name>
 
 

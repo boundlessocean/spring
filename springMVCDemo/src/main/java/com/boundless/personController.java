@@ -11,6 +11,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
@@ -181,7 +182,8 @@ public class personController {
 //        HandlerAdapter
 //        HandlerMapping
 //        ViewResolver
-        WebApplicationContext
+//        WebApplicationContext
+//        HttpRequestHandler
         return "success";
     }
 
