@@ -41,15 +41,13 @@
 
 
         <bean name="/name" class="com.boundless.myControllerEmp"/>
-        <bean id="httphand" class="com.boundless.HttpRequestHandlerImp"/>
 
-    <bean id="httphandler" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-
-    <property name="mappings">
-        <props>
-            <prop key="httphandlerkey">httphand</prop>
-        </props>
-    </property>
-
-    </bean>
+        <bean id="httpRequestHandlerImp" class="com.boundless.HttpRequestHandlerImp"/>
+        <bean id="simpleUrlHandlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+            <property name="mappings">
+                <props>
+                <prop key="index">httpRequestHandlerImp</prop>
+                </props>
+            </property>
+        </bean>
 </beans>

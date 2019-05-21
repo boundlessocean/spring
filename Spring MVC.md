@@ -1,4 +1,4 @@
-# Spring MVC
+#Spring MVC
 
 
 
@@ -146,9 +146,9 @@ public class WebApplicationInt extends AbstractDispatcherServletInitializer {
 | Bean                                  | 说明                                                         |
 | ------------------------------------- | ------------------------------------------------------------ |
 | HandlerMapping                        | 将请求映射到 **处理器** 和 **拦截器列表**                    |
-| HandlerAdapter                        | 在  **适配器列表**  中通过 supports() 找到合适的  **适配器** |
-| HandlerExceptionResolver              | 解决异常的策略，可能将它们映射到处理程序，HTML错误视图或其他目标。 |
-| ViewResolver                          | `String`将从处理程序返回的基于逻辑的视图名称解析为`View` 用于呈现给响应的实际视图。 |
+| HandlerAdapter                        | 处理请求获得**ModelAndView**                                 |
+| HandlerExceptionResolver              | 解决异常的策略                                               |
+| ViewResolver                          | 将**ViewAndModel**解析为**View** 用于呈现给响应的实际视图。  |
 | LocaleResolver、LocaleContextResolver | 解决`Locale`客户端正在使用的时间区域，以便能够提供国际化的视图。 |
 | ThemeResolver                         | 解决Web应用程序可以使用的主题 - 例如，提供个性化布局。       |
 | MultipartResolver                     | 在一些多部分解析库的帮助下，解析多部分请求（例如，浏览器表单文件上载）的抽象。 |
@@ -185,7 +185,7 @@ public class DispatcherServlet extends FrameworkServlet {
 - **BeanNameUrlHandlerMapping** ：通过实现Controller的映射类型
 - **SimpleUrlHandlerMapping** ：通过实现HttpRequestHandler 的映射类型
 - **RequestMappingHandlerMapping** ：注解配置@RequestMapping 的映射类型
-- **DefaultAnnotationHandlerMapping** : 已废弃 
+- **~~DefaultAnnotationHandlerMapping~~** : 已废弃 
 
 ```java
 public interface HandlerMapping {
@@ -249,7 +249,13 @@ public class personController {
 
 1. **DispatcherServlet**收到请求调用自己的`getHandler()`
 2. `getHandler()`遍历**handlerMappings** 得到 **HandlerMapping**对象
-3. **HandlerMapping** 调用 `getHandler(request)`方法找到正确的**HandlerMapping**类型组装成**HandlerExecutionChain**
+3. **HandlerMapping** 调用 `getHandler(request)`方法, 此方法由**AbstractHandlerMapping**实现。
+4. **AbstractHandlerMapping** 的`getHandler`中调用`getHandlerInternal` 获取`handle`处理器
+5. `getHandlerInternal`是一个抽象方法(由**AbstractHandlerMethodMapping**和**AbstractUrlHandlerMapping**实现),最后获取到**HandlerMethod**或者**controller**对象
+
+
+
+![handleMapping](https://ws3.sinaimg.cn/large/006tNc79gy1g38rqy2o7bj30py0jx76p.jpg)
 
 ```java
 @Nullable
@@ -283,17 +289,78 @@ public class HandlerExecutionChain {
 
 ### 5.HandlerAdapter
 
+> **HandlerAdapter** 的主要作用是调用`handle`方法获取 **ModelAndView** 返回给**DispatcherServlet**
+
+```java
+public interface HandlerAdapter {
+
+   boolean supports(Object handler);
+
+   @Nullable
+   ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
+    
+   long getLastModified(HttpServletRequest request, Object handler);
+}
+```
+
+**HandlerAdapter** 的几个实现类：
+
+* **HttpRequestHandlerAdapter**  实现**HttpRequestHandler**处理请求
+* **SimpleControllerHandlerAdapter**  实现**Controller**处理请求
+* **SimpleServletHandlerAdapter**  继承至**HttpServlet** 处理请求
+* **RequestMappingHandlerAdapter**
 
 
 
+几种类处理请求的代码
+
+```java
+// 1. HttpRequestHandlerAdapter 
+public class HttpRequestHandlerImp implements HttpRequestHandler {
+    @Override
+    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setAttribute("name", "张三");
+        request.getRequestDispatcher("index.jsp").forward(request, response);
+    }
+}
+
+// 2. SimpleControllerHandlerAdapter
+public class myControllerEmp implements Controller {
+    @Override
+    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("success");
+        modelAndView.addObject("message", "HelloWorld");
+        return modelAndView;
+    }
+}
+
+// 3. SimpleServletHandlerAdapter
+public class DemoServlet extends HttpServlet{   
+    @Override  
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)  
+            throws ServletException, IOException {   
+        response.setContentType(CONTENT_TYPE);  
+        response.setHeader("Pragma", "No-cache");  
+        response.setHeader("Cache-Control", "no-cache");  
+        response.setDateHeader("Expires", 0);  
+        PrintWriter out = response.getWriter();  
+        out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");    
+        out.flush();  
+        out.close();  
+    }  
+```
 
 
 
+接着**HandlerMapping** 的执行步骤：
 
+1. 得到 **HandlerExecutionChain**
+2. 遍历 **DispatcherServlet** 的 **handlerAdapters**
+3. 调用`supports(handle)`获取到 **handlerAdapter**
+4. 调用`handle`获取**ModelAndView**
 
-
-
-
+![handleAdapter](https://ws1.sinaimg.cn/large/006tNc79gy1g38tgyo24yj30th0hztbc.jpg)
 
 
 
