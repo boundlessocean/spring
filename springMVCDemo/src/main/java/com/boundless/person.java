@@ -1,6 +1,8 @@
 package com.boundless;
 
-public class person {
+import java.io.Serializable;
+
+public class person implements Serializable {
     private String name;
     private int age;
     private Address address;

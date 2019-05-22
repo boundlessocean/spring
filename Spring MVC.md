@@ -364,6 +364,55 @@ public class DemoServlet extends HttpServlet{
 
 
 
+### 6.HttpMessageConverter
+
+> 我们知道，使用@RequestBody、@ResponseBody注解，可以直接将输入解析成Json、将输出解析成Json，HttpMessageConverter发挥着作用。
+
+
+
+######6.1 @ResponseBody注解  处理输出报文
+
+在**HandlerMapping**中**RequestMappingHandlerAdapter**执行`invoke(method)`的时候会对**Controller**中的返回值进行处理，处理的流程如下图：
+
+![ResponseBody](https://ws4.sinaimg.cn/large/006tNc79gy1g3a5qpn6hqj30pk0iq76b.jpg)
+
+######6.2 @requestBody注解  处理请求报文
+
+![requestBody](https://ws4.sinaimg.cn/large/006tNc79gy1g3a8qkran4j30ov0ec75i.jpg)
+
+
+
+###7.ViewResolver
+
+> 把一个逻辑上的视图名称解析为一个真正的视图
+
+
+
+**DisparcherServlet**收到**ModelAndView**后解析逻辑如下：
+
+![viewResolver](https://ws3.sinaimg.cn/large/006tNc79gy1g3aaofqsd7j30j90ge3zi.jpg)
+
+
+
+Spring配置文件中必须注册视图解析器
+
+```xml
+<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    <property name="prefix" value="/WEB-INF/page/"/>
+    <property name="suffix" value=".jsp"/>
+</bean>
+```
+
+
+
+
+
+
+
+
+
+
+
 <https://blog.csdn.net/a745233700/article/details/80963758>
 
 
@@ -376,33 +425,11 @@ public class DemoServlet extends HttpServlet{
 
 
 
-<https://www.jianshu.com/p/5a2210253b88>
-
-
-
-<http://www.cnblogs.com/dreamworlds/p/5396209.html>
-
-
-
-<https://blog.csdn.net/a362212624/article/details/80431499>
 
 
 
 
 
-<https://blog.csdn.net/j080624/article/details/70245741>
-
-
-
-
-
-<https://blog.csdn.net/zbajie001/article/details/79738181>
-
-
-
-```
-ResourceHttpRequestHandler
-```
 
 
 

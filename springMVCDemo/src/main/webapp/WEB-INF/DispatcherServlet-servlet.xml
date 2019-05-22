@@ -14,7 +14,27 @@
 
 
         <context:component-scan base-package="com.boundless"/>
-        <mvc:annotation-driven/>
+        <mvc:annotation-driven>
+            <mvc:message-converters>
+                <bean id="fastJsonHttpMessageConverter"
+                      class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                    <!-- 加入支持的媒体类型：返回contentType -->
+                    <property name="supportedMediaTypes">
+                        <list>
+                            <!-- 这里顺序不能反，一定先写text/html,不然ie下会出现下载提示 -->
+                            <value>text/html;charset=UTF-8</value>
+                            <value>application/json</value>
+                        </list>
+                    </property>
+                    <!--枚举类型，对于返回List集合中引用同一个对象，忽略引用检测【注意不要出现循环引用现象】-->
+                    <property name="features">
+                        <list>
+                            <value>DisableCircularReferenceDetect</value>
+                        </list>
+                    </property>
+                </bean>
+            </mvc:message-converters>
+        </mvc:annotation-driven>
         <mvc:interceptors>
             <mvc:interceptor>
                 <mvc:mapping path="/**"/>
