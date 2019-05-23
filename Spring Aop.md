@@ -16,7 +16,7 @@
 
 ### 2.AOP组成部分
 
-#### 2.1目标类
+#### 2.1 目标类
 
 ```java
 @Component("xiaowang")

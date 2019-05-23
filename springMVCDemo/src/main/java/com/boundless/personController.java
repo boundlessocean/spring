@@ -5,10 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.net.httpserver.HttpServer;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+//import org.apache.commons.fileupload.FileItem;
+//import org.apache.commons.fileupload.FileUploadException;
+//import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+//import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
@@ -16,9 +16,11 @@ import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.*;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
+import javax.naming.Name;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -36,12 +38,12 @@ import java.util.logging.SimpleFormatter;
 @RequestMapping("person")
 public class personController implements Serializable {
 
-    @RequestMapping("hello")
+    @GetMapping("hello")
     public String getPersonName(){
         return "name";
     }
 
-    @RequestMapping(value = "insert",method = RequestMethod.POST)
+    @PostMapping("insert")
     public String insertPerson(acount p){
         System.out.println(p);
         return "name";
@@ -59,8 +61,8 @@ public class personController implements Serializable {
         return "name";
     }
 
-    @RequestMapping(value = "responseBody",method = RequestMethod.POST)
-    public String responseBody(@RequestBody String body){
+    @RequestMapping(value = "requestBody",method = RequestMethod.POST)
+    public String responseBody(@RequestBody person body){
         System.out.println(body);
         return "name";
     }
@@ -85,8 +87,23 @@ public class personController implements Serializable {
         return "name";
     }
 
-    @ModelAttribute
-    public person testModelAttribute(){
+//    @ModelAttribute()
+//    public person testModelAttribute(){
+//
+//        Address address = new Address();
+//        address.setArea("高新区");
+//        address.setStreet("190号");
+//
+//        person p = new person();
+//        p.setAge(20);
+//        p.setName("张三");
+//        p.setAddress(address);
+//        System.out.println("数据库用户：" +p);
+//        return p;
+//    }
+
+    @ModelAttribute()
+    public void testModelAttribute(person person){
 
         Address address = new Address();
         address.setArea("高新区");
@@ -96,10 +113,13 @@ public class personController implements Serializable {
         p.setAge(20);
         p.setName("张三");
         p.setAddress(address);
-        System.out.println("数据库用户：" +p);
-        return p;
-    }
+//        System.out.println("数据库用户：" +p);
 
+//        person.setName(p.getName());
+//        person.setAge(p.getAge());
+//        person.setAddress(p.getAddress());
+//        System.out.println(person);
+    }
 
     @RequestMapping("success")
     public String success(){
@@ -155,31 +175,30 @@ public class personController implements Serializable {
         System.out.println(imageName);
         System.out.println(uploadFile);
 
-//        String basePath = request.getServletContext().getRealPath("WEB-INF/upload/");
-//        String dataPath = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-//        File file = new File(basePath,dataPath);
-//        if (!file.exists()){
-//            file.mkdirs();
-//        }
+        String basePath = request.getServletContext().getRealPath("WEB-INF/upload/");
+        String dataPath = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        File file = new File(basePath,dataPath);
+        if (!file.exists()){
+            file.mkdirs();
+        }
 
 //        DispatcherServlet
 
         String fileName = uploadFile.getOriginalFilename();
         fileName = UUID.randomUUID().toString().replace("-","").toUpperCase() + fileName;
 
-        String serverImagePath = "http://localhost:9091/upload/";
-        Client client = Client.create();
-        WebResource resource = client.resource(serverImagePath+fileName);
-        String result = resource.put(String.class,uploadFile.getBytes());
+//        String serverImagePath = "http://localhost:9091/upload/";
+//        Client client = Client.create();
+//        WebResource resource = client.resource(serverImagePath+fileName);
+//        String result = resource.put(String.class,uploadFile.getBytes());
 
-        System.out.println(result);
-//        uploadFile.transferTo(new File(file,fileName));
-
+//        System.out.println(result);
+        uploadFile.transferTo(new File(file,fileName));
 //        ResourceHttpRequestHandler
 //        DispatcherServlet
 //        HttpMessageConverter
-
-
+//        MultipartResolver
+//        HandlerExceptionResolver
 //        View
 //        HandlerAdapter
 //        HandlerMapping

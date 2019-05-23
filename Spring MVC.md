@@ -143,16 +143,16 @@ public class WebApplicationInt extends AbstractDispatcherServletInitializer {
 
 
 
-| Bean                                  | 说明                                                         |
-| ------------------------------------- | ------------------------------------------------------------ |
-| HandlerMapping                        | 将请求映射到 **处理器** 和 **拦截器列表**                    |
-| HandlerAdapter                        | 处理请求获得**ModelAndView**                                 |
-| HandlerExceptionResolver              | 解决异常的策略                                               |
-| ViewResolver                          | 将**ViewAndModel**解析为**View** 用于呈现给响应的实际视图。  |
-| LocaleResolver、LocaleContextResolver | 解决`Locale`客户端正在使用的时间区域，以便能够提供国际化的视图。 |
-| ThemeResolver                         | 解决Web应用程序可以使用的主题 - 例如，提供个性化布局。       |
-| MultipartResolver                     | 在一些多部分解析库的帮助下，解析多部分请求（例如，浏览器表单文件上载）的抽象。 |
-| FlashMapManager                       | 存储和检索“输入”和“输出” `FlashMap`，可用于将属性从一个请求传递到另一个请求，通常是通过重定向。 |
+| Bean                                  | 说明                                                        |
+| ------------------------------------- | ----------------------------------------------------------- |
+| HandlerMapping                        | 将请求映射到 **处理器** 和 **拦截器列表**                   |
+| HandlerAdapter                        | 处理请求获得**ModelAndView**                                |
+| HandlerExceptionResolver              | 解决异常的策略                                              |
+| ViewResolver                          | 将**ViewAndModel**解析为**View** 用于呈现给响应的实际视图。 |
+| LocaleResolver、LocaleContextResolver | 本地化                                                      |
+| ThemeResolver                         | 主题                                                        |
+| MultipartResolver                     | 文件解析器                                                  |
+| FlashMapManager                       | 重定向是属性传递                                            |
 
 
 
@@ -405,6 +405,20 @@ Spring配置文件中必须注册视图解析器
 
 
 
+###8.MultipartResolver
+
+> 文件解析器，用于对客户端上传的文件进行解析。
+
+
+
+1.配置了文件解析器，请求进入**DispatcherServlet**会使用文件解析器解析请求。
+
+2.未配置文件解析器，在执行`InvokeMethod`的时候处理参数，会使用**StandardServletMultipartResolver**解析器解析文件。
+
+![MultipartResolver](https://ws1.sinaimg.cn/large/006tNc79gy1g3b8zpajaxj30qc0ek404.jpg)
+
+
+
 
 
 
@@ -421,11 +435,11 @@ Spring配置文件中必须注册视图解析器
 
 
 
-<http://www.cnblogs.com/tengyunhao/p/7518481.html>
+<https://segmentfault.com/q/1010000005139036>
 
 
 
-
+异常处理
 
 
 
