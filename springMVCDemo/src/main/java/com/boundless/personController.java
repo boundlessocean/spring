@@ -18,6 +18,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 import javax.naming.Name;
@@ -38,7 +39,7 @@ import java.util.logging.SimpleFormatter;
 @RequestMapping("person")
 public class personController implements Serializable {
 
-    @GetMapping("hello")
+    @RequestMapping(value = "hello",method = RequestMethod.GET)
     public String getPersonName(){
         return "name";
     }
@@ -87,23 +88,8 @@ public class personController implements Serializable {
         return "name";
     }
 
-//    @ModelAttribute()
-//    public person testModelAttribute(){
-//
-//        Address address = new Address();
-//        address.setArea("高新区");
-//        address.setStreet("190号");
-//
-//        person p = new person();
-//        p.setAge(20);
-//        p.setName("张三");
-//        p.setAddress(address);
-//        System.out.println("数据库用户：" +p);
-//        return p;
-//    }
-
     @ModelAttribute()
-    public void testModelAttribute(person person){
+    public person testModelAttribute(){
 
         Address address = new Address();
         address.setArea("高新区");
@@ -113,13 +99,43 @@ public class personController implements Serializable {
         p.setAge(20);
         p.setName("张三");
         p.setAddress(address);
-//        System.out.println("数据库用户：" +p);
-
-//        person.setName(p.getName());
-//        person.setAge(p.getAge());
-//        person.setAddress(p.getAddress());
-//        System.out.println(person);
+        System.out.println("数据库用户：" +p);
+        return p;
     }
+
+
+    @RequestMapping("test")
+    public String test(RedirectAttributes attr){
+        Address address = new Address();
+        address.setArea("高新区1");
+        address.setStreet("190号1");
+
+        person p = new person();
+        p.setAge(201);
+        p.setName("张三1");
+        p.setAddress(address);
+//        attr.addAttribute("name","xialu");         //这里传入的参数会出现在重定向后的url中，相当于get方式。
+        attr.addFlashAttribute("person",p);    //这里传入的参数会用flashmap保存
+        return "redirect:modelAttribute";
+    }
+//    @ModelAttribute()
+//    public void testModelAttribute(){
+//
+//        Address address = new Address();
+//        address.setArea("高新区");
+//        address.setStreet("190号");
+//
+//        person p = new person();
+//        p.setAge(20);
+//        p.setName("张三");
+//        p.setAddress(address);
+////        System.out.println("数据库用户：" +p);
+//
+////        person.setName(p.getName());
+////        person.setAge(p.getAge());
+////        person.setAddress(p.getAddress());
+//
+//    }
 
     @RequestMapping("success")
     public String success(){

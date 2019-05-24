@@ -289,7 +289,7 @@ public class HandlerExecutionChain {
 
 ### 5.HandlerAdapter
 
-> **HandlerAdapter** 的主要作用是调用`handle`方法获取 **ModelAndView** 返回给**DispatcherServlet**
+> **HandlerAdapter** 的主要作用是调用`handle`方法执行**Controller**中的业务代码获取 **ModelAndView** 返回给**DispatcherServlet**
 
 ```java
 public interface HandlerAdapter {
@@ -416,6 +416,58 @@ Spring配置文件中必须注册视图解析器
 2.未配置文件解析器，在执行`InvokeMethod`的时候处理参数，会使用**StandardServletMultipartResolver**解析器解析文件。
 
 ![MultipartResolver](https://ws1.sinaimg.cn/large/006tNc79gy1g3b8zpajaxj30qc0ek404.jpg)
+
+
+
+
+
+### 9.Handler
+
+> Handler也就是我们的Controller，用于处理业务逻辑。这里我们只描述注解类型(RequestMappingHandlerAdapter)的Handler
+
+
+
+###### 9.1 请求映射
+
+
+
+* @RequestMapping(value = "path",method = RequestMethod.POST)
+* @GetMapping
+* @PostMapping
+* @PutMapping
+* @DeleteMapping
+* @PatchMapping
+
+
+
+URI：
+
+```java
+@GetMapping("/owners/{ownerId}/pets/{petId}")
+public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
+    // ...
+}
+
+@Controller
+@RequestMapping("/owners/{ownerId}")
+public class OwnerController {
+
+    @GetMapping("/pets/{petId}")
+    public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
+        // ...
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
 
 
 
