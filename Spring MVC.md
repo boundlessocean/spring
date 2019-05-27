@@ -429,7 +429,7 @@ Spring配置文件中必须注册视图解析器
 
 ###### 9.1 请求映射
 
-
+注解：
 
 * @RequestMapping(value = "path",method = RequestMethod.POST)
 * @GetMapping
@@ -437,6 +437,8 @@ Spring配置文件中必须注册视图解析器
 * @PutMapping
 * @DeleteMapping
 * @PatchMapping
+
+
 
 
 
@@ -448,12 +450,39 @@ public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
     // ...
 }
 
+
 @Controller
 @RequestMapping("/owners/{ownerId}")
 public class OwnerController {
-
-    @GetMapping("/pets/{petId}")
+    
+	// 1.通过 produces（Accept）缩小匹配范围
+    @GetMapping(path = "/pets/{petId}",
+                produces = "application/json;charset=UTF-8")
     public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
+        // ...
+    }
+    
+    // 2.通过 consumes（Content-Type）缩小匹配范围
+    @GetMapping(path = "/pets/{petId}",
+                consumes = "application/json")
+    public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
+        // ...
+    }
+    
+    // 3.通过 参数是否等于某个值、是否包含某个参数 来匹配
+    @GetMapping(path = "/pets/{petId}",
+                params = "param=value",
+               // params = "param",
+               // params = "!param"
+               ) 
+	public void findPet(@PathVariable String petId) {
+   		 	// ...
+	}
+    
+    // 4.通过 header是否等于某个值 来匹配
+    @GetMapping(path = "/pets", 
+                headers = "header=value") 
+    public void findPet(@PathVariable String petId) {
         // ...
     }
 }
@@ -461,39 +490,198 @@ public class OwnerController {
 
 
 
+######9.2 处理器方法
+
+1. 支持的方法参数
+
+| 控制器方法参数                                               | 描述                                                         |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| javax.servlet.ServletRequest、 javax.servlet.ServletResponse | 选择任何特定的请求或响应类型`ServletRequest`，`HttpServletRequest`或Spring的`MultipartRequest`，`MultipartHttpServletRequest`。 |
+| javax.servlet.http.HttpSession                               | HTTP会话，请注意，会话访问不是线程安全的。如果允许多个请求同时访问会话，请考虑将`RequestMappingHandlerAdapter`实例的`synchronizeOnSession`标志设置为 `true`。 |
+| HttpMethod                                                   | 请求的HTTP方法。                                             |
+| java.util.Locale                                             | 当前请求区域设置，由最具体确定`LocaleResolver`可用的（实际上，配置的`LocaleResolver`或`LocaleContextResolver`）。 |
+| java.util.TimeZone + java.time.ZoneId                        | 与当前请求关联的时区，由a确定`LocaleContextResolver`。       |
+| java.io.InputStream， java.io.Reader                         | 用于访问Servlet API公开的原始请求主体。                      |
+| java.io.OutputStream， java.io.Writer                        | 用于访问Servlet API公开的原始响应主体。                      |
+| @PathVariable                                                | 用于访问URI模板变量。                                        |
+| @RequestParam                                                | 用于访问Servlet请求参数，包括多部分文件。参数值将转换为声明的方法参数类型。请注意，`@RequestParam`对于简单参数值，使用是可选的。 |
+| @RequestHeader                                               | 用于访问请求标头。标头值将转换为声明的方法参数类型。         |
+| @CookieValue                                                 | 用于访问cookie。Cookie值将转换为声明的方法参数类型。         |
+| @RequestBody                                                 | 用于访问HTTP请求正文。通过使用`HttpMessageConverter`实现将正文内容转换为声明的方法参数类型。 |
+| @RequestPart                                                 | 要访问`multipart/form-data`请求中的某个部分，请使用。转换部件的主体`HttpMessageConverter` |
+| RedirectAttributes                                           | 指定在重定向（即，要附加到查询字符串）的情况下使用的属性，以及临时存储的flash属性，直到重定向后的请求为止。 |
+| @ModelAttribute                                              | 用于访问模型中的现有属性（如果不存在则实例化），并应用数据绑定和验证。 |
+| Errors，BindingResult                                        | 用于访问命令对象（即`@ModelAttribute`参数）的验证和数据绑定中的错误或来自`@RequestBody`或 `@RequestPart`参数验证的错误。您必须在经过验证的方法参数之后立即声明一个`Errors`或`BindingResult`参数。 |
+| @SessionAttribute                                            | 用于访问任何会话属性                                         |
+| @RequestAttribute                                            | 用于访问请求属性,多是在过滤器或拦截器创建的、预先存在的请求属性 |
+
+2. 返回值
+
+下表描述了支持的控制器方法返回值。
+
+| 控制器方法返回值      | 描述                                                         |
+| --------------------- | ------------------------------------------------------------ |
+| @ResponseBody         | 返回值通过`HttpMessageConverter`实现转换并写入响应。         |
+| HttpHeaders           | 用于返回带标题且没有正文的响应。                             |
+| String                | 要使用`ViewResolver`实现解析的视图名称                       |
+| View                  | ViewAndModel渲染后的视图                                     |
+| @ModelAttribute       | 要添加到模型的属性                                           |
+| ModelAndView          | 要使用的视图和模型属性，以及（可选）响应状态。               |
+| void                  | 具有`void`返回类型（或`null`返回值）的方法被认为已完全处理响应。 |
+| StreamingResponseBody | `OutputStream`异步写入响应。也支持作为一个体 `ResponseEntity` |
+
+例子：
+
+```java
+@Controller
+@RequestMapping("person")
+public class personController  {
+
+    @GetMapping("requestHeader")
+    public String requestHeader(@RequestHeader(value = "Accept-Language") String language,int id){
+        System.out.println(language +" id = "+id);
+        return "name";
+    }
+
+
+    @GetMapping("cookieValue")
+    public String cookieValue(@CookieValue(value = "JSESSIONID") String cookie){
+        System.out.println(cookie);
+        return "name";
+    }
+
+
+    @GetMapping("modelAttribute")
+    public String modelAttribute(person p){
+        System.out.println("传入用户："+p);
+        return "name";
+    }
+
+    
+    @ModelAttribute()
+    public person testModelAttribute(){    
+        person p = findPersonByID(1);
+        return p;
+    }
+
+    
+    @GetMapping("flashMap")
+    public String flashMap(RedirectAttributes attr){
+        person p = findPersonByID(1);
+//        attr.addAttribute("name","xialu");         //这里传入的参数会出现在重定向后的url中，相当于get方式。
+        attr.addFlashAttribute("person",p);    //这里传入的参数会用flashmap保存
+        return "redirect:modelAttribute";
+    }
+
+
+    @GetMapping("sendRedirect")
+    public void sendRedirect(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+//        request.getRequestDispatcher("success").forward(request,response);
+        response.sendRedirect("success");
+    }
+
+
+    @GetMapping("forword")
+    public String forword(){
+        return "redirect:testVoid";
+    }
+
+
+    @PostMapping("jsonBody")
+    @ResponseBody
+    public person jsonBody(@RequestBody person p,
+                           Integer id) throws IOException {
+        person u = findPersonByID(id);
+        u.setName(p.getName());
+        return u;
+    }
+```
+
+```java
+@Controller
+@SessionAttributes(value = "p")
+@RequestMapping("job")
+public class JobController {
+
+    @GetMapping("applyJob")
+    public String apply(@ModelAttribute("p") person p,
+                        @RequestAttribute("name") String name){
+        System.out.println("找工作的人 ="+"person = " +p.toString()+" name = "+name);
+        return "success";
+    }
+
+
+    @GetMapping("userName")
+    public  String  user(Model model){
+        Address address = new Address();
+        address.setArea("高新区");
+        address.setStreet("1901号");
+
+        person p = new person();
+        p.setAge(10);
+        p.setName("张三");
+        p.setAddress(address);
+        model.addAttribute("p",p);
+        return "success";
+    }
+}
+```
 
 
 
+### 10.异常处理
+
+1. HandlerExceptionResolver
+
+```java
+public class ExceptionResolver implements HandlerExceptionResolver {
+    @Override
+    public ModelAndView resolveException(HttpServletRequest request,
+                                         HttpServletResponse response, 
+                                         Object handler, Exception ex) {
+        // handle exception ...
+        return new ModelAndView();
+    }
+}
+```
 
 
 
+2. ControllerAdvice
 
+```java
+@ControllerAdvice
+public class myExceptionHandle {
 
+    @ExceptionHandler(myException.class)
+    public void handle(myException ex){
+        System.out.println(ex.getErrorMsg());
+    }
+}
 
+public class myException extends Exception {
+    public String getErrorMsg() {
+        return errorMsg;
+    }
 
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
 
+    private String errorMsg;
 
+}
 
-
-
-
-
-
-<https://blog.csdn.net/a745233700/article/details/80963758>
-
-
-
-<https://docs.spring.io/spring/docs/5.2.0.M1/spring-framework-reference/web.html#mvc-config>
-
-
-
-<https://segmentfault.com/q/1010000005139036>
-
-
-
-异常处理
-
-
+ @GetMapping("compareName")
+ public String compareName(String name) throws myException {
+    if (name == null){
+        myException exception = new myException();
+        exception.setErrorMsg("name错误，请检查");
+        throw exception;
+    }
+    return "success";
+ }
+```
 
 
 
