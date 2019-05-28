@@ -66,9 +66,9 @@
         </bean>
 
 
-        <bean name="/name" class="com.boundless.myControllerEmp"/>
+        <bean name="/name" class="com.boundless.handle.myControllerEmp"/>
 
-        <bean id="httpRequestHandlerImp" class="com.boundless.HttpRequestHandlerImp"/>
+        <bean id="httpRequestHandlerImp" class="com.boundless.handle.HttpRequestHandlerImp"/>
         <bean id="simpleUrlHandlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
             <property name="mappings">
                 <props>

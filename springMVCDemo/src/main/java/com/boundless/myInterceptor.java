@@ -11,6 +11,7 @@ public class myInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         System.out.println("HttpServletRequest");
+        request.setAttribute("name","zhangsan");
         return true;
     }
 
