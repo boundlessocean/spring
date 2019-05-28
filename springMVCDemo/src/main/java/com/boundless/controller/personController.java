@@ -171,7 +171,7 @@ public class personController  {
         person u = findPersonByID(id);
         u.setName(p.getName());
         if (p.getAge()==20) {
-            HandlerExceptionResolver
+//            HandlerExceptionResolver
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,"错误，错误");
 //            throw new UserNameNotMatchPasswordException();
         }

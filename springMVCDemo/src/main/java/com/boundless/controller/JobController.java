@@ -1,9 +1,11 @@
 package com.boundless.controller;
 
 import com.boundless.ExceptionHandle.myException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.naming.Name;
 
@@ -23,6 +25,17 @@ public class JobController {
         return "success";
     }
 
+
+    @GetMapping("cumlacuteNum")
+    public String cumlacuteNum(int id) throws Exception {
+        try {
+            int i = 10/id;
+        } catch (Exception ex){
+            throw ex;
+        }
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,"错误，错误");
+//        return "success";
+    }
 
     @GetMapping("idTest")
     public String idTest(int id) {
