@@ -2,7 +2,7 @@ package com.boundless.controller;
 
 
 import com.alibaba.fastjson.JSONObject;
-import com.boundless.ExceptionHandle.UserNameNotMatchPasswordException;
+//import com.boundless.ExceptionHandle.UserNameNotMatchPasswordException;
 import com.boundless.acount;
 //import org.apache.commons.fileupload.FileItem;
 //import org.apache.commons.fileupload.FileUploadException;
@@ -167,7 +167,7 @@ public class personController  {
     @RequestMapping("jsonBody")
     @ResponseBody
     public person jsonBody(@RequestBody person p,
-                           Integer id) throws IOException, ResponseStatusException {
+                            Integer id) throws IOException, ResponseStatusException {
         person u = findPersonByID(id);
         u.setName(p.getName());
         if (p.getAge()==20) {

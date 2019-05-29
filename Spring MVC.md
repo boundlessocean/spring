@@ -143,16 +143,16 @@ public class WebApplicationInt extends AbstractDispatcherServletInitializer {
 
 
 
-| Bean                                  | 说明                                                        |
-| ------------------------------------- | ----------------------------------------------------------- |
-| HandlerMapping                        | 将请求映射到 **处理器** 和 **拦截器列表**                   |
-| HandlerAdapter                        | 处理请求获得**ModelAndView**                                |
-| HandlerExceptionResolver              | 解决异常的策略                                              |
-| ViewResolver                          | 将**ViewAndModel**解析为**View** 用于呈现给响应的实际视图。 |
-| LocaleResolver、LocaleContextResolver | 本地化                                                      |
-| ThemeResolver                         | 主题                                                        |
-| MultipartResolver                     | 文件解析器                                                  |
-| FlashMapManager                       | 重定向是属性传递                                            |
+| Bean                                  | 说明             |
+| ------------------------------------- | ---------------- |
+| HandlerMapping                        | 处理器映射器     |
+| HandlerAdapter                        | 处理器适配器     |
+| HandlerExceptionResolver              | 处理器异常解析器 |
+| ViewResolver                          | 视图解析器       |
+| LocaleResolver、LocaleContextResolver | 本地化解析器     |
+| ThemeResolver                         | 主题解析器       |
+| MultipartResolver                     | 文件解析器       |
+| FlashMapManager                       | 重定向属性传递   |
 
 
 
@@ -182,8 +182,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 **HandlerMapping** 接口有以下几种实现类型
 
-- **BeanNameUrlHandlerMapping** ：通过实现Controller的映射类型
-- **SimpleUrlHandlerMapping** ：通过实现HttpRequestHandler 的映射类型
+- **BeanNameUrlHandlerMapping** ：通过Spring 配置Bean Name的方式
+- **SimpleUrlHandlerMapping** ：通过Spring 配置SimpleUrlHandlerMapping的方式
 - **RequestMappingHandlerMapping** ：注解配置@RequestMapping 的映射类型
 - **~~DefaultAnnotationHandlerMapping~~** : 已废弃 
 
@@ -374,6 +374,8 @@ public class DemoServlet extends HttpServlet{
 
 在**HandlerMapping**中**RequestMappingHandlerAdapter**执行`invoke(method)`的时候会对**Controller**中的返回值进行处理，处理的流程如下图：
 
+> 需要注意：最后一步，`body.flish()`之后，**DispatcherServlet**得到的**ModelAndView**是`null`,最后一个箭头是不需要的。
+
 ![ResponseBody](https://ws4.sinaimg.cn/large/006tNc79gy1g3a5qpn6hqj30pk0iq76b.jpg)
 
 ######6.2 @requestBody注解  处理请求报文
@@ -405,7 +407,228 @@ Spring配置文件中必须注册视图解析器
 
 
 
-###8.MultipartResolver
+### 8.HandlerExceptionResolver
+
+> 上一节中**DisparcherServlet**对**ModelAndView**渲染之前会坚持是否有异常，存在异常是会使用**HandlerExceptionResolver**处理异常
+
+
+
+**HandlerExceptionResolver**是一个接口：
+
+```java
+public interface HandlerExceptionResolver {
+    @Nullable
+	ModelAndView resolveException(
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex);
+}
+```
+
+
+
+SpringMVC中提供的 **HandlerExceptionResolver**的实现类：
+
+| HandlerExceptionResolver          | 描述                                                         |
+| --------------------------------- | ------------------------------------------------------------ |
+| SimpleMappingExceptionResolver    | 将异常映射到配置好的错误页面                                 |
+| DefaultHandlerExceptionResolver   | 默认的异常处理解析器（未配置异常任何异常处理时会使用它）     |
+| ResponseStatusExceptionResolver   | 使用`@ResponseStatus`注释解析异常，并根据注释中的值将它们映射到HTTP状态代码。 |
+| ExceptionHandlerExceptionResolver | 通过`@ExceptionHandler`解决异常的都会使用它来解析            |
+
+
+
+**DisparcherServlet**中关于**HandlerExceptionResolver**的部分代码：
+
+```java
+public class DispatcherServlet extends FrameworkServlet {
+	/** List of HandlerExceptionResolvers used by this servlet. */
+	@Nullable
+	private List<HandlerExceptionResolver> handlerExceptionResolvers;
+    
+    /**
+	 * Initialize the strategy objects that this servlet uses.
+	 * <p>May be overridden in subclasses in order to initialize further strategy objects.
+	 */
+    protected void initStrategies(ApplicationContext context) {
+        ...
+		initHandlerExceptionResolvers(context);
+        ...
+	}
+    ...
+}
+```
+
+我们可以看到在服务器启动时会根据**ApplicationContext(Spring配置)**初始化属性**handlerExceptionResolvers**,而`<mvc:annotation-driven>`注解默认会为我们装配以下**HandlerExceptionResolver**：
+
+* 1.ExceptionHandlerExceptionResolver	
+* 2.ResponseStatusExceptionResolver           
+* 3.DefaultHandlerExceptionResolver 	        
+
+我们发先少了**SimpleMappingExceptionResolver**，如过要使用它需要在Spring配置文件中配置，配置之后**handlerExceptionResolvers**就会多一个**SimpleMappingExceptionResolver**，如下：
+
+```Xml
+<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+    <property name="exceptionMappings">
+        <props>
+            <prop key="java.lang.IndexOutOfBoundsException">error</prop>
+        </props>
+    </property>
+</bean>
+```
+
+当出现**IndexOutOfBoundsException**（数组越界）异常时，并且没有其他处理器处理此异常，就回返回**error.jsp**页面
+
+
+
+######8.1 ExceptionHandlerExceptionResolver
+
+> 使用@ExceptionHandler注解的控制器都会被**ExceptionHandlerExceptionResolver**解析
+
+而@ExceptionHandler注解方法的控制器，只能接受当前控制器的异常处理，所以我们要配合@ControllerAdvice注解做到全局处理异常。
+
+```java
+@ControllerAdvice
+@Component
+public class myExceptionHandle  {
+    @ExceptionHandler(IndexOutOfBoundsException.class)
+    public String handleArg(IndexOutOfBoundsException ex){
+        return "error";
+    }
+}
+```
+
+以上代码与Spring配置文件中配置**SimpleMappingExceptionResolver**达到同样的效果。
+
+
+
+SpringMVC 还提供了一个异常处理抽象类**ResponseEntityExceptionHandler**，代码如下：
+
+```java
+public abstract class ResponseEntityExceptionHandler {
+    @ExceptionHandler({
+          HttpRequestMethodNotSupportedException.class,
+          HttpMediaTypeNotSupportedException.class,
+          HttpMediaTypeNotAcceptableException.class,
+          MissingPathVariableException.class,
+          MissingServletRequestParameterException.class,
+          ServletRequestBindingException.class,
+          ConversionNotSupportedException.class,
+          TypeMismatchException.class,
+          HttpMessageNotReadableException.class,
+          HttpMessageNotWritableException.class,
+          MethodArgumentNotValidException.class,
+          MissingServletRequestPartException.class,
+          BindException.class,
+          NoHandlerFoundException.class,
+          AsyncRequestTimeoutException.class
+       })
+    @Nullable
+    public final ResponseEntity<Object> handleException(Exception ex, WebRequest request) throws Exception {
+       ...
+    }
+}
+```
+
+P
+
+可以看出，这个类对特定的一些异常进行了处理，我们如果需要使用它，代码如下：
+
+```java
+@ControllerAdvice
+@Component
+public class subResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+
+    // 如果需要重写某个异常处理,
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        // 对异常处理重写
+        ...
+        return super.handleHttpMessageNotReadable(ex, headers, status, request);
+    }
+}
+```
+
+加上@ControllerAdvice后，就配合ResponseEntityExceptionHandler中的@ExceptionHandler全局处理了这些异常。
+
+
+
+1. **@ExceptionHandler**注解的方法支持一下参数：
+
+| 参数                                                         | 描述                                                         |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Exception                                                    | 用于访问引发的异常。                                         |
+| HandlerMethod                                                | 用于访问引发异常的控制器方法。                               |
+| WebRequest、NativeWebRequest                                 | 无需直接使用Servlet API即可访问请求参数以及请求和会话属性。  |
+| javax.servlet.ServletRequest、 javax.servlet.ServletResponse | 请求或响应（`ServletRequest` 、  `HttpServletRequest`、 `MultipartRequest` 、 `MultipartHttpServletRequest`） |
+| javax.servlet.http.HttpSession                               | 会话                                                         |
+| HttpMethod                                                   | 请求的HTTP方法。                                             |
+| java.util.Locale                                             | 当前请求区域设置，由最具体的`LocaleResolver`可用区域确定     |
+| java.util.TimeZone、java.time.ZoneId                         | 与当前请求关联的时区，由`LocaleContextResolver`确定          |
+| java.io.OutputStream、java.io.Writer                         | 用于访问原始响应主体，由Servlet API公开。                    |
+| java.util.Map、org.springframework.ui.Model、org.springframework.ui.ModelMap | 用于访问模型                                                 |
+| RedirectAttributes                                           | 指定在重定向的情况下使用的属性                               |
+| @SessionAttribute                                            | 用于访问任何会话属性                                         |
+| @RequestAttribute                                            | 用于访问请求属性                                             |
+
+2. **@ExceptionHandler**方法支持以下返回值：
+
+| 返回值                                      | 描述                                                         |
+| ------------------------------------------- | ------------------------------------------------------------ |
+| @ResponseBody                               | 返回值通过HttpMessageConverter实例转换并写入响应             |
+| HttpEntity<B>、ResponseEntity<B>            | 返回值指定完整响应（包括HTTP标头和正文）通过`HttpMessageConverter`实例转换并写入响应 |
+| String                                      | 使用`ViewResolver`实现解析的视图名称                         |
+| View                                        | 返回渲染的View                                               |
+| java.util.Map、org.springframework.ui.Model | 模型                                                         |
+| @ModelAttribute                             | 要添加到模型的属性                                           |
+| ModelAndView                                | ModelAndView                                                 |
+| void                                        | 用的方法`void`返回类型被认为已经完全处理的响应               |
+
+###### 8.2 ResponseStatusExceptionResolver  
+
+> 使用**@ResponseStatus** 会被 **ResponseStatusExceptionResolver** 解析
+
+```java
+@ResponseStatus(value = HttpStatus.FORBIDDEN,reason = "用户名和密码不匹配!")
+public class UserNameNotMatchPasswordException extends Exception{
+
+}
+```
+
+```java
+@GetMapping("login")
+public void login() throws UserNameNotMatchPasswordException {
+    throw new UserNameNotMatchPasswordException();
+}
+```
+
+
+
+
+
+
+
+
+
+1. HandlerExceptionResolver
+
+```java
+public class ExceptionResolver implements HandlerExceptionResolver {
+    @Override
+    public ModelAndView resolveException(HttpServletRequest request,
+                                         HttpServletResponse response, 
+                                         Object handler, Exception ex) {
+        // handle exception ...
+        return new ModelAndView();
+    }
+}
+```
+
+
+
+
+
+
+
+###9.MultipartResolver
 
 > 文件解析器，用于对客户端上传的文件进行解析。
 
@@ -421,13 +644,13 @@ Spring配置文件中必须注册视图解析器
 
 
 
-### 9.Handler
+### 10.Handler
 
 > Handler也就是我们的Controller，用于处理业务逻辑。这里我们只描述注解类型(RequestMappingHandlerAdapter)的Handler
 
 
 
-###### 9.1 请求映射
+###### 10.1 请求映射
 
 注解：
 
@@ -490,7 +713,7 @@ public class OwnerController {
 
 
 
-######9.2 处理器方法
+######10.2 处理器方法
 
 1. 支持的方法参数
 
@@ -628,60 +851,6 @@ public class JobController {
 ```
 
 
-
-### 10.异常处理
-
-1. HandlerExceptionResolver
-
-```java
-public class ExceptionResolver implements HandlerExceptionResolver {
-    @Override
-    public ModelAndView resolveException(HttpServletRequest request,
-                                         HttpServletResponse response, 
-                                         Object handler, Exception ex) {
-        // handle exception ...
-        return new ModelAndView();
-    }
-}
-```
-
-
-
-2. ControllerAdvice
-
-```java
-@ControllerAdvice
-public class myExceptionHandle {
-
-    @ExceptionHandler(myException.class)
-    public void handle(myException ex){
-        System.out.println(ex.getErrorMsg());
-    }
-}
-
-public class myException extends Exception {
-    public String getErrorMsg() {
-        return errorMsg;
-    }
-
-    public void setErrorMsg(String errorMsg) {
-        this.errorMsg = errorMsg;
-    }
-
-    private String errorMsg;
-
-}
-
- @GetMapping("compareName")
- public String compareName(String name) throws myException {
-    if (name == null){
-        myException exception = new myException();
-        exception.setErrorMsg("name错误，请检查");
-        throw exception;
-    }
-    return "success";
- }
-```
 
 
 

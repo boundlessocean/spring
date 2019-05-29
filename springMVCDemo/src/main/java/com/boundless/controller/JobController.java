@@ -1,13 +1,17 @@
 package com.boundless.controller;
 
+import com.boundless.ExceptionHandle.UserNameNotMatchPasswordException;
 import com.boundless.ExceptionHandle.myException;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.naming.Name;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @SessionAttributes(value = "p")
@@ -15,14 +19,20 @@ import javax.naming.Name;
 public class JobController {
 
 
+    @GetMapping("login")
+    public void login() throws UserNameNotMatchPasswordException {
+        throw new UserNameNotMatchPasswordException();
+    }
+
     @GetMapping("compareName")
     public String compareName(String name) throws myException {
         if (name == null){
             myException exception = new myException();
             exception.setErrorMsg("name错误，请检查");
             throw exception;
+        } else {
+            throw new HttpMessageNotReadableException("dddddd");
         }
-        return "success";
     }
 
 
@@ -33,6 +43,9 @@ public class JobController {
         } catch (Exception ex){
             throw ex;
         }
+        List<String> list = new ArrayList<>();
+        list.add("1111");
+        String a = list.get(1);
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,"错误，错误");
 //        return "success";
     }

@@ -34,6 +34,7 @@
                     </property>
                 </bean>
             </mvc:message-converters>
+
         </mvc:annotation-driven>
         <mvc:interceptors>
             <mvc:interceptor>
@@ -43,7 +44,8 @@
         </mvc:interceptors>
 
 
-        <bean class="com.boundless.ExceptionHandle.impExceptionHandle"/>
+
+
         <!--文件解析器    -->
         <!--<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">-->
             <!--<property name="maxUploadSize">-->
@@ -78,4 +80,12 @@
                 </props>
             </property>
         </bean>
+
+        <!--<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">-->
+            <!--<property name="exceptionMappings">-->
+                <!--<props>-->
+                    <!--<prop key="java.lang.IndexOutOfBoundsException">error</prop>-->
+                <!--</props>-->
+            <!--</property>-->
+        <!--</bean>-->
 </beans>

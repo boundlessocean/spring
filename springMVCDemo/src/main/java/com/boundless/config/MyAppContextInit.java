@@ -17,6 +17,7 @@ public class MyAppContextInit implements WebApplicationInitializer {
         xac.setConfigLocation("WEB-INF/DispatcherServlet-servlet.xml");
 
         DispatcherServlet servlet = new DispatcherServlet(xac);
+        servlet.setThrowExceptionIfNoHandlerFound(false);
         ServletRegistration.Dynamic registration = servletContext.addServlet("app",servlet);
         registration.setLoadOnStartup(1);
         registration.addMapping("/");

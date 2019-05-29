@@ -6,7 +6,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-@Order(-1)
+@Order(10)
 public class impExceptionHandle implements HandlerExceptionResolver {
     @Override
     public ModelAndView resolveException(HttpServletRequest request,

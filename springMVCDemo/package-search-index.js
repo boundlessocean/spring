@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"com.boundless"},{"l":"com.boundless.config"},{"l":"com.boundless.controller"},{"l":"com.boundless.ExceptionHandle"},{"l":"com.boundless.handle"},{"l":"所有程序包","url":"allpackages-index.html"}]
