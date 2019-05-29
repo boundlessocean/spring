@@ -22,8 +22,8 @@
                     <property name="supportedMediaTypes">
                         <list>
                             <!-- 这里顺序不能反，一定先写text/html,不然ie下会出现下载提示 -->
-                            <value>text/html;charset=UTF-8</value>
                             <value>application/json</value>
+                            <value>text/html;charset=UTF-8</value>
                         </list>
                     </property>
                     <!--枚举类型，对于返回List集合中引用同一个对象，忽略引用检测【注意不要出现循环引用现象】-->

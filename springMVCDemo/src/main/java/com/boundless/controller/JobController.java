@@ -7,8 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +22,10 @@ public class JobController {
 
 
     @GetMapping("login")
-    public void login() throws UserNameNotMatchPasswordException {
-        throw new UserNameNotMatchPasswordException();
+    public void login() throws HttpRequestMethodNotSupportedException {
+        throw new HttpRequestMethodNotSupportedException("error");
     }
-
+//    DefaultHandlerExceptionResolver
     @GetMapping("compareName")
     public String compareName(String name) throws myException {
         if (name == null){

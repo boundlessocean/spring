@@ -460,8 +460,8 @@ public class DispatcherServlet extends FrameworkServlet {
 我们可以看到在服务器启动时会根据**ApplicationContext(Spring配置)**初始化属性**handlerExceptionResolvers**,而`<mvc:annotation-driven>`注解默认会为我们装配以下**HandlerExceptionResolver**：
 
 * 1.ExceptionHandlerExceptionResolver	
-* 2.ResponseStatusExceptionResolver           
-* 3.DefaultHandlerExceptionResolver 	        
+* 2.ResponseStatusExceptionResolver 
+* 3.DefaultHandlerExceptionResolver
 
 我们发先少了**SimpleMappingExceptionResolver**，如过要使用它需要在Spring配置文件中配置，配置之后**handlerExceptionResolvers**就会多一个**SimpleMappingExceptionResolver**，如下：
 
@@ -541,8 +541,11 @@ public class subResponseEntityExceptionHandler extends ResponseEntityExceptionHa
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         // 对异常处理重写
-        ...
-        return super.handleHttpMessageNotReadable(ex, headers, status, request);
+        String body = "请求错误";
+        Map<String, Object> map = new HashMap<>();
+        map.put("body", body);
+        
+        return super.handleExceptionInternal(ex, body, headers, status, request);
     }
 }
 ```
@@ -602,13 +605,19 @@ public void login() throws UserNameNotMatchPasswordException {
 
 
 
+###### 8.3 DefaultHandlerExceptionResolver
+
+> 在未配置异常处理的情况下，默认会使用它来处理，处理的异常类与ResponseEntityExceptionHandler相同，
+>
+> 不同的是，DefaultHandlerExceptionResolver把body错误信息填充好，ResponseEntityExceptionHandler没有填充body错误信息。
 
 
 
+######8.4 实现HandlerExceptionResolver处理异常
 
-
-
-1. HandlerExceptionResolver
+> 我们知道SpringMVC提供的这几个类都是实现了HandlerExceptionResolver接口来处理异常。
+>
+> 如果我们不需要SpringMVC提供的这几个类来处理可以直接实现HandlerExceptionResolver接口来处理异常。
 
 ```java
 public class ExceptionResolver implements HandlerExceptionResolver {
