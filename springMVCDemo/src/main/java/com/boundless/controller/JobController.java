@@ -2,17 +2,25 @@ package com.boundless.controller;
 
 import com.boundless.ExceptionHandle.UserNameNotMatchPasswordException;
 import com.boundless.ExceptionHandle.myException;
+import com.boundless.model.all;
+import com.boundless.model.course;
+import com.boundless.model.student;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -20,11 +28,36 @@ import java.util.List;
 @RequestMapping("job")
 public class JobController {
 
+//    @InitBinder
+//    public void initBinder(WebDataBinder binder) {
+//        CustomDateEditor editor = new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"),true);
+//        binder.registerCustomEditor(Date.class, editor);
+//    }
+//    FormattingConversionServiceFactoryBean
+
+
+    @InitBinder("student")
+    public void initBinderUser(WebDataBinder binder) {
+        binder.setFieldDefaultPrefix("student.");
+    }
+
+    @InitBinder("course")
+    public void initBinderCourse(WebDataBinder binder) {
+        binder.setFieldDefaultPrefix("course.");
+    }
+
+
+    @PostMapping("object")
+    @ResponseBody
+    public all object(student stu,course cre,all all){
+        return all;
+    }
 
     @GetMapping("login")
     public void login() throws HttpRequestMethodNotSupportedException {
         throw new HttpRequestMethodNotSupportedException("error");
     }
+
 //    DefaultHandlerExceptionResolver
     @GetMapping("compareName")
     public String compareName(String name) throws myException {

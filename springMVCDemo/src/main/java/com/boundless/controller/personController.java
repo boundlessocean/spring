@@ -3,7 +3,7 @@ package com.boundless.controller;
 
 import com.alibaba.fastjson.JSONObject;
 //import com.boundless.ExceptionHandle.UserNameNotMatchPasswordException;
-import com.boundless.acount;
+import com.boundless.model.acount;
 //import org.apache.commons.fileupload.FileItem;
 //import org.apache.commons.fileupload.FileUploadException;
 //import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -13,8 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.ServletException;

@@ -53,5 +53,15 @@
     <input type="submit" value="上传"/> <br/>
 </form>
 
+
+
+<form action="/job/object" method="post">
+    <input type="text" name="student.id" value="student_id">
+    <input type="text" name="student.name" value="student_name">
+    <input type="text" name="course.id" value="course_id">
+    <input type="text" name="course.name" value="course_name">
+    <input type="text" name="date" value="1990-01-01">
+    <input type="submit" value="提交">
+</form>
 </body>
 </html>
