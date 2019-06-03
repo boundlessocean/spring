@@ -1,13 +1,12 @@
 package com.boundless.controller;
 
-import com.boundless.ExceptionHandle.UserNameNotMatchPasswordException;
+//import com.boundless.ExceptionHandle.UserNameNotMatchPasswordException;
 import com.boundless.ExceptionHandle.myException;
 import com.boundless.model.all;
 import com.boundless.model.course;
 import com.boundless.model.student;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.context.support.ConversionServiceFactoryBean;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
-import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
@@ -16,11 +15,8 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -30,10 +26,10 @@ public class JobController {
 
 //    @InitBinder
 //    public void initBinder(WebDataBinder binder) {
-//        CustomDateEditor editor = new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"),true);
+////        CustomDateEditor editor = new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"),true);
+//        DatePeopertyEditor editor = new DatePeopertyEditor(new SimpleDateFormat("yyyy-MM-dd"));
 //        binder.registerCustomEditor(Date.class, editor);
 //    }
-//    FormattingConversionServiceFactoryBean
 
 
     @InitBinder("student")
@@ -49,7 +45,13 @@ public class JobController {
 
     @PostMapping("object")
     @ResponseBody
-    public all object(student stu,course cre,all all){
+    public all object(student stu, course cre, all all){
+        System.out.println(all);
+
+        FormattingConversionServiceFactoryBean
+//        ConversionServiceFactoryBean
+
+
         return all;
     }
 

@@ -18,22 +18,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-@ControllerAdvice
-@Component
-public class subResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
-
-    @Override
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        return super.handleHttpMessageNotReadable(ex, headers, status, request);
-    }
-
-    @Override
-    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        String method = ex.getMethod();
-        String[] supportedMethods = ex.getSupportedMethods();
-        String body = "不支持的请求类型：" + method + "，支持的请求类型：" + Arrays.toString(supportedMethods);
-        Map<String, Object> map = new HashMap<>();
-        map.put("body", body);
-        return super.handleExceptionInternal(ex, body, headers, status, request);
-    }
-}
+//@ControllerAdvice
+//@Component
+//public class subResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+//
+//    @Override
+//    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+//        return super.handleHttpMessageNotReadable(ex, headers, status, request);
+//    }
+//
+//    @Override
+//    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+//        String method = ex.getMethod();
+//        String[] supportedMethods = ex.getSupportedMethods();
+//        String body = "不支持的请求类型：" + method + "，支持的请求类型：" + Arrays.toString(supportedMethods);
+//        Map<String, Object> map = new HashMap<>();
+//        map.put("body", body);
+//        return super.handleExceptionInternal(ex, body, headers, status, request);
+//    }
+//}

@@ -7,7 +7,7 @@ import java.util.Date;
 public class all {
      course course;
      student student;
-     @DateTimeFormat(pattern = "yyyy-MM-dd")
+//     @DateTimeFormat(pattern = "yyyy-MM-dd")
      Date date;
 
     public Date getDate() {
@@ -15,7 +15,7 @@ public class all {
     }
 
     public void setDate(Date date) {
-        this.date = date;
+        this.date =  date;
     }
 
     public com.boundless.model.course getCourse() {

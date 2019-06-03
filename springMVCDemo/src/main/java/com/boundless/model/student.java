@@ -1,8 +1,8 @@
 package com.boundless.model;
 
 public class student {
-     String id;
-     String name;
+    private String id;
+    private String name;
 
     public String getId() {
         return id;
@@ -22,7 +22,7 @@ public class student {
 
     @Override
     public String toString() {
-        return "student{" +
+        return "course{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 '}';
