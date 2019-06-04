@@ -5,17 +5,18 @@ import com.boundless.ExceptionHandle.myException;
 import com.boundless.model.all;
 import com.boundless.model.course;
 import com.boundless.model.student;
-import org.springframework.context.support.ConversionServiceFactoryBean;
-import org.springframework.format.support.FormattingConversionServiceFactoryBean;
+import com.boundless.validation.studentValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,12 +25,15 @@ import java.util.List;
 @RequestMapping("job")
 public class JobController {
 
-//    @InitBinder
-//    public void initBinder(WebDataBinder binder) {
-////        CustomDateEditor editor = new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"),true);
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+//        CustomDateEditor editor = new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"),true);
 //        DatePeopertyEditor editor = new DatePeopertyEditor(new SimpleDateFormat("yyyy-MM-dd"));
 //        binder.registerCustomEditor(Date.class, editor);
-//    }
+//        if (binder.getObjectName().equals("student")){
+//            binder.addValidators(new studentValidator());
+//        }
+    }
 
 
     @InitBinder("student")
@@ -45,12 +49,14 @@ public class JobController {
 
     @PostMapping("object")
     @ResponseBody
-    public all object(student stu, course cre, all all){
+    public all object(@Valid student stu,  BindingResult bindingResult, course cre, all all){
         System.out.println(all);
 
-        FormattingConversionServiceFactoryBean
+//        FormattingConversionServiceFactoryBean
 //        ConversionServiceFactoryBean
-
+        if(bindingResult.hasErrors()){
+            System.out.println(bindingResult.getAllErrors());
+        }
 
         return all;
     }

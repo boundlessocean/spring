@@ -861,24 +861,330 @@ public class JobController {
 
 
 
+### 11.数据校验
+
+> 将验证视为业务逻辑有利有弊，而Spring提供了一种不排除其中任何一种的验证（和数据绑定）设计。具体来说，验证不应该与Web层相关联，并且应该易于本地化，并且应该可以插入任何可用的验证器。考虑到这些问题，Spring提出了一个`Validator`。
 
 
 
+###### 11.1 Validator接口验证
 
 
 
-<https://jinnianshilongnian.iteye.com/blog/1733708>
+Validator 接口如下：
+
+```java
+public interface Validator {
+	// 通过clazz来确定是否要支持验证
+	boolean supports(Class<?> clazz);
+	// 通过target，errors 实现验证逻辑
+	void validate(Object target, Errors errors);
+}
+```
 
 
 
-<https://jinnianshilongnian.iteye.com/blog/1729739>
+1. 实现了Validator接口的验证类：
+
+```java
+public class studentValidator implements Validator {
+    @Override
+    public boolean supports(Class<?> clazz) {
+        return student.class.equals(clazz);
+    }
+
+    @Override
+    public void validate(Object target, Errors errors) {
+        student s = (student) target;
+        if (s.getName().length() < 3){
+            errors.rejectValue("name","Length","名字长度大于3");
+        }
+    }
+}
+```
 
 
 
-<https://jinnianshilongnian.iteye.com/blog/1723270>
+2. Validator验证类通过InitBinder添加到Controller中：
+
+```java
+public class JobController {
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        if (binder.getObjectName().equals("student")){
+            binder.addValidators(new studentValidator());
+        }
+    }
+    
+    @PostMapping("object")
+    @ResponseBody
+    public Result object(@Valid student stu,  BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            // handle error
+        }
+        return Result;
+    }
+}
+```
 
 
 
-<https://www.cnblogs.com/whgk/p/7191152.html>
+###### 11.2 hibernate-validator、validation-api 校验 
 
-<https://docs.spring.io/spring/docs/5.2.0.M1/spring-framework-reference/web.html#mvc-config>
+> 这两个库提供了一些注解供校验使用
+
+
+
+1. pom中加入hibernate-validator、validation-api
+
+```xml
+<dependency>
+  <groupId>org.hibernate.validator</groupId>
+  <artifactId>hibernate-validator</artifactId>
+  <version>6.0.16.Final</version>
+</dependency>
+
+<dependency>
+  <groupId>javax.validation</groupId>
+  <artifactId>validation-api</artifactId>
+  <version>2.0.0.Final</version>
+</dependency>
+```
+
+
+
+2. 在entity中使用注解
+
+```java
+public class student {
+	@Length(min=2, max=5, message="ID的长度在2-5之间")
+    @Null(message = "id 不能为空")
+    private String id;
+    private String name;
+}
+```
+
+
+
+3. Controller中使用
+
+```java
+public class JobController {
+    @PostMapping("object")
+    @ResponseBody
+    public Result object(@Valid student stu,  BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            // handle error
+        }
+        return Result;
+    }
+}
+```
+
+
+
+| **验证注解**                                 | **验证的数据类型**                                           | **说明**                                                     |
+| -------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| @AssertFalse                                 | Boolean,boolean                                              | 验证注解的元素值是false                                      |
+| @AssertTrue                                  | Boolean,boolean                                              | 验证注解的元素值是true                                       |
+| @NotNull                                     | 任意类型                                                     | 验证注解的元素值不是null                                     |
+| @Null                                        | 任意类型                                                     | 验证注解的元素值是null                                       |
+| @Min(value=值)                               | BigDecimal，BigInteger, byte,short, int, long，等任何Number或CharSequence（存储的是数字）子类型 | 验证注解的元素值大于等于@Min指定的value值                    |
+| @Max（value=值）                             | 和@Min要求一样                                               | 验证注解的元素值小于等于@Max指定的value值                    |
+| @DecimalMin(value=值)                        | 和@Min要求一样                                               | 验证注解的元素值大于等于@ DecimalMin指定的value值            |
+| @DecimalMax(value=值)                        | 和@Min要求一样                                               | 验证注解的元素值小于等于@ DecimalMax指定的value值            |
+| @Digits(integer=整数位数, fraction=小数位数) | 和@Min要求一样                                               | 验证注解的元素值的整数位数和小数位数上限                     |
+| @Size(min=下限, max=上限)                    | 字符串、Collection、Map、数组等                              | 验证注解的元素值的在min和max（包含）指定区间之内，如字符长度、集合大小 |
+| @Past                                        | java.util.Date,java.util.Calendar;Joda Time类库的日期类型    | 验证注解的元素值（日期类型）比当前时间早                     |
+| @Future                                      | 与@Past要求一样                                              | 验证注解的元素值（日期类型）比当前时间晚                     |
+| @NotBlank                                    | CharSequence子类型                                           | 验证注解的元素值不为空（不为null、去除首位空格后长度为0），不同于@NotEmpty，@NotBlank只应用于字符串且在比较时会去除字符串的首位空格 |
+| @Length(min=下限, max=上限)                  | CharSequence子类型                                           | 验证注解的元素值长度在min和max区间内                         |
+| @NotEmpty                                    | CharSequence子类型、Collection、Map、数组                    | 验证注解的元素值不为null且不为空（字符串长度不为0、集合大小不为0） |
+| @Range(min=最小值, max=最大值)               | BigDecimal,BigInteger,CharSequence, byte, short, int, long等原子类型和包装类型 | 验证注解的元素值在最小值和最大值之间                         |
+| @Email(regexp=正则表达式,flag=标志的模式)    | CharSequence子类型（如String）                               | 验证注解的元素值是Email，也可以通过regexp和flag指定自定义的email格式 |
+| @Pattern(regexp=正则表达式,flag=标志的模式)  | String，任何CharSequence的子类型                             | 验证注解的元素值与指定的正则表达式匹配                       |
+| @Valid                                       | 任何非原子类型                                               | 指定递归验证关联的对象；如用户对象中有个地址对象属性，如果想在验证用户对象时一起验证地址对象的话，在地址对象上加@Valid注解即可级联验证 |
+
+
+
+###12.PropertyEditor类型转换 
+
+> String - <T> 类型转换
+
+###### 12.1 继承PropertyEditorSupport类型转换
+
+1. 继承PropertyEditorSupport
+
+   ```java
+   public class DatePeopertyEditor extends PropertyEditorSupport {
+       @Override
+       public void setAsText(String text) throws IllegalArgumentException {
+           try {
+               Date d = getDateFormat().parse(text);
+               setValue(d);
+           } catch (ParseException e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+           }
+       }
+   }
+   ```
+
+   ​
+
+2. 使用
+
+   * 通过 @InitBinder 绑定，作用在当前控制器
+
+   ```java
+   public class JobController {
+
+       @InitBinder
+       public void initBinder(WebDataBinder binder) {
+           DatePeopertyEditor editor = new DatePeopertyEditor(new SimpleDateFormat("yyyy-MM-dd"));
+           binder.registerCustomEditor(Date.class, editor);
+       }
+   }
+   ```
+
+   * 如果你需要将String转换为XX(自定义类型)，可以将XXPeopertyEditor与XX放在相同目录下，Spring回自动注册。不需要通过其他方式绑定
+
+​	
+
+######12.2 使用Spring内置的PropertyEditor 
+
+直接使用
+
+```java
+public class JobController {
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        CustomDateEditor editor = new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"),true);
+        binder.registerCustomEditor(Date.class, editor);
+    }
+}
+```
+
+
+
+**内置PropertyEditor实现类**
+
+| 类                        | 说明                                                         |
+| ------------------------- | ------------------------------------------------------------ |
+| `ByteArrayPropertyEditor` | 字节数组的编辑器。将字符串转换为其对应的字节表示形式。默认注册`BeanWrapperImpl`。 |
+| `ClassEditor`             | 解析表示类到实际类的字符串，反之亦然。当找不到某个类时，`IllegalArgumentException`会抛出一个类。默认情况下，注册者 `BeanWrapperImpl`。 |
+| `CustomBooleanEditor`     | 属性的可自定义属性编辑器`Boolean`。默认情况下，注册 `BeanWrapperImpl`但可以通过将其自定义实例注册为自定义编辑器来覆盖。 |
+| `CustomCollectionEditor`  | 集合的属性编辑器，将任何源`Collection`转换为给定的目标 `Collection`类型。 |
+| `CustomDateEditor`        | 可自定义的属性编辑器`java.util.Date`，支持自定义`DateFormat`。没有默认注册。必须根据需要使用适当的格式进行用户注册。 |
+| `CustomNumberEditor`      | 定制的属性编辑器`Number`的子类，如`Integer`，`Long`，`Float`，或 `Double`。默认情况下，注册`BeanWrapperImpl`但可以通过将其自定义实例注册为自定义编辑器来覆盖。 |
+| `FileEditor`              | 将字符串解析为`java.io.File`对象。默认情况下，注册者 `BeanWrapperImpl`。 |
+| `InputStreamEditor`       | 单向属性编辑器，可以获取字符串并生成（通过中间`ResourceEditor`和`Resource`），`InputStream`以便`InputStream` 属性可以直接设置为字符串。请注意，默认用法不会`InputStream`为您关闭。默认情况下，注册者`BeanWrapperImpl`。 |
+| `LocaleEditor`            | 可以将字符串解析为`Locale`对象，反之亦然（字符串格式 `*[country]*[variant]`与`toString()`方法 相同`Locale`）。默认情况下，注册者`BeanWrapperImpl`。 |
+| `PatternEditor`           | 可以将字符串解析为`java.util.regex.Pattern`对象，反之亦然。  |
+| `PropertiesEditor`        | 可以将字符串（使用`java.util.Properties`类的javadoc中定义的格式进行格式化 ）转换为`Properties`对象。默认情况下，注册者`BeanWrapperImpl`。 |
+| `StringTrimmerEditor`     | 修剪字符串的属性编辑器。（可选）允许将空字符串转换为`null`值。默认情况下未注册 - 必须是用户注册的。 |
+| `URLEditor`               | 可以将URL的字符串表示形式解析为实际`URL`对象。默认情况下，注册者`BeanWrapperImpl`。 |
+
+
+
+### 13. 使用Converter类型转换
+
+> 与PropertyEditor不同，Converter可以实现任意类型<S>-任意类型转换<T>
+
+1. 实现接口
+
+```java
+public class dateConvtore implements Converter<String,Date> {
+    @Override
+    public Date convert(String source) {
+        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date d = sf.parse(source);
+            return d;
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+```
+
+
+
+2. Spring配置文件
+
+```xml
+<mvc:annotation-driven conversion-service="conversionService"/>
+<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+    <property name="converters">
+        <set>
+            <bean class="com.boundless.convertor.dateConvtore"/>
+        </set>
+    </property>
+</bean>
+```
+
+
+
+###14. 数据格式化
+
+> Formatter SPI核心是完成解析和格式化转换逻辑，在如Web应用/客户端项目中，需要解析、打印/展示本地化的对象值时使用
+
+[查看文献](https://jinnianshilongnian.iteye.com/blog/1729739)
+
+
+
+### 15.拦截器
+
+1. 实现HandlerInterceptor接口
+
+```java
+public class myInterceptor implements HandlerInterceptor {
+    // 拦截请求
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("HttpServletRequest");
+        request.setAttribute("name","zhangsan");
+        return true;
+    }
+
+    // 向客户端返回数据之前调用
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("postHandle");
+    }
+
+    // 向客户端返回数据之后调用
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("afterCompletion");
+    }
+}
+```
+
+
+
+2. 注册拦截器
+
+```xml
+<mvc:interceptors>
+    <mvc:interceptor>
+        <mvc:mapping path="/**"/>
+        <bean id="myInterceptor" class="com.boundless.myInterceptor"/>
+    </mvc:interceptor>
+</mvc:interceptors>
+```
+
+```java
+@Configuration
+@EnableWebMvc
+public class WebConfig implements WebMvcConfigurer {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new myInterceptor()).addPathPatterns("/**");
+    }
+}
+```
+

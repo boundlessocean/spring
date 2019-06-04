@@ -1,7 +1,14 @@
 package com.boundless.model;
 
+import org.hibernate.validator.constraints.Length;
+
+import javax.validation.constraints.*;
+
 public class student {
+//    @Length(min=2, max=5, message="{user.name.error}")
+    @Null(message = "id 不能为空")
     private String id;
+    @NotEmpty(message = "name no empty")
     private String name;
 
     public String getId() {
@@ -22,7 +29,7 @@ public class student {
 
     @Override
     public String toString() {
-        return "course{" +
+        return "student{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 '}';

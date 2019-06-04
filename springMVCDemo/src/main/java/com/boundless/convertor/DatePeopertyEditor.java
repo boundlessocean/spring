@@ -8,9 +8,9 @@ import java.util.Date;
 
 public class DatePeopertyEditor extends PropertyEditorSupport {
 
-    private DateFormat dateFormat;
+    private String dateFormat;
 
-    public DatePeopertyEditor(DateFormat format){
+    public DatePeopertyEditor(String format){
         setDateFormat(format);
     }
 
@@ -18,7 +18,8 @@ public class DatePeopertyEditor extends PropertyEditorSupport {
     public void setAsText(String text) throws IllegalArgumentException {
 
         try {
-            Date d = getDateFormat().parse(text);
+            DateFormat format = new SimpleDateFormat(getDateFormat());
+            Date d = format.parse(text);
             setValue(d);
         } catch (ParseException e) {
             // TODO Auto-generated catch block
@@ -28,11 +29,11 @@ public class DatePeopertyEditor extends PropertyEditorSupport {
     }
 
 
-    public DateFormat getDateFormat() {
+    public String getDateFormat() {
         return dateFormat;
     }
 
-    public void setDateFormat(DateFormat dateFormat) {
+    public void setDateFormat(String dateFormat) {
         this.dateFormat = dateFormat;
     }
 }
