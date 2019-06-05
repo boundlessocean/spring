@@ -1121,7 +1121,7 @@ public class JobController {
 
 ### 13. 使用Converter类型转换
 
-> 与PropertyEditor不同，Converter可以实现任意类型<S>-任意类型转换<T>
+> 与PropertyEditor不同，Converter可以实现任意类型`<S>` - 任意类型转换`<T>`
 
 1. 实现接口
 
