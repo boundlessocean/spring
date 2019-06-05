@@ -2,6 +2,12 @@
 
 
 
+[TOC]
+
+
+
+
+
 ### 1.介绍
 
 >Spring MVC是一个基于Servlet API构建的轻量级Web框架，通过把Model，View，Controller分离，将web层进行职责解耦，把复杂的web应用分成逻辑清晰的几部分，简化开发，减少出错，方便组内开发人员之间的配合。
@@ -929,11 +935,7 @@ public class JobController {
 
 
 
-###### 11.2 hibernate-validator、validation-api 校验 
-
-> 这两个库提供了一些注解供校验使用
-
-
+###### 11.2 JSR303 验证 
 
 1. pom中加入hibernate-validator、validation-api
 
@@ -1049,7 +1051,8 @@ public class JobController {
 
    * 如果你需要将String转换为XX(自定义类型)，可以将XXPeopertyEditor与XX放在相同目录下，Spring回自动注册。不需要通过其他方式绑定
 
-​	
+
+
 
 ######12.2 使用Spring内置的PropertyEditor 
 
@@ -1085,6 +1088,34 @@ public class JobController {
 | `PropertiesEditor`        | 可以将字符串（使用`java.util.Properties`类的javadoc中定义的格式进行格式化 ）转换为`Properties`对象。默认情况下，注册者`BeanWrapperImpl`。 |
 | `StringTrimmerEditor`     | 修剪字符串的属性编辑器。（可选）允许将空字符串转换为`null`值。默认情况下未注册 - 必须是用户注册的。 |
 | `URLEditor`               | 可以将URL的字符串表示形式解析为实际`URL`对象。默认情况下，注册者`BeanWrapperImpl`。 |
+
+
+
+###### 12.3 @InitBinder 其他使用
+
+> 如果客户端传了多个实体类，但是这些实体类在我们这里都是单独存在，那么我们可以通过以下方式绑定数据
+
+```java
+@InitBinder("student")
+    public void initBinderUser(WebDataBinder binder) {
+        binder.setFieldDefaultPrefix("student.");
+    }
+
+    @InitBinder("course")
+    public void initBinderCourse(WebDataBinder binder) {
+        binder.setFieldDefaultPrefix("course.");
+    }
+
+
+	@PostMapping("object")
+    @ResponseBody
+    public void object(student stu, course cre){
+        // ...
+    }
+}
+```
+
+
 
 
 
@@ -1186,5 +1217,29 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(new myInterceptor()).addPathPatterns("/**");
     }
 }
+```
+
+
+
+### 16.静态资源配置
+
+```java
+@Configuration
+@EnableWebMvc
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/resources/**")
+            .addResourceLocations("/static/")
+            .setCachePeriod(31556926);
+    }
+}
+```
+
+```xml
+<mvc:resources mapping="/resources/**"
+    location="/static/"
+    cache-period="31556926" />
 ```
 

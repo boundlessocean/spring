@@ -26,6 +26,7 @@
                             <value>text/html;charset=UTF-8</value>
                         </list>
                     </property>
+                    <property name="dateFormat" value="yyyy-MM-dd"/>
                     <!--枚举类型，对于返回List集合中引用同一个对象，忽略引用检测【注意不要出现循环引用现象】-->
                     <property name="features">
                         <list>
@@ -43,26 +44,13 @@
             </mvc:interceptor>
         </mvc:interceptors>
 
-
-    <bean id="dateEditor" class="com.boundless.convertor.DatePeopertyEditor">
-        <constructor-arg name="format" value="yyyy-MM-dd"/>
-    </bean>
-    <bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
-        <property name="customEditors">
-            <map>
-                <entry key="java.util.Date" value-ref="dateEditor"/>
-            </map>
-        </property>
-    </bean>
-
-        <!--<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>-->
-    <!--<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">-->
-            <!--<property name="converters">-->
-                <!--<set>-->
-                    <!--<bean class="com.boundless.convertor.dateConvtore"/>-->
-                <!--</set>-->
-            <!--</property>-->
-        <!--</bean>-->
+        <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+            <property name="converters">
+                <set>
+                    <bean class="com.boundless.convertor.dateConvtore"/>
+                </set>
+            </property>
+        </bean>
 
         <!--文件解析器    -->
         <!--<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">-->
@@ -77,9 +65,9 @@
 
 
         <!--设置静态资源不过滤-->
-        <mvc:resources mapping="/css/" location="/css/**"/>
-        <mvc:resources mapping="/images/" location="/images/**"/>
-        <mvc:resources mapping="/scripts/" location="/scripts/**"/>
+        <mvc:resources mapping="/job/file"
+                       location="/css/"
+                       cache-period="31556926" />
         <!--<mvc:resources mapping="WEB-INF/page/**" location="WEB-INF/page/"/>-->
 
         <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">

@@ -16,7 +16,10 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +47,46 @@ public class JobController {
     @InitBinder("course")
     public void initBinderCourse(WebDataBinder binder) {
         binder.setFieldDefaultPrefix("course.");
+    }
+
+
+    @GetMapping("file")
+    public void getFile(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String directory = request.getServletContext().getRealPath("WEB-INF/upload");
+        File file = new File(directory,"05100180031119164990.pdf");
+        if (file.exists()){
+            response.setContentType("application/pdf");
+            response.addHeader("Content-Disposition","attachment; filename=1.pdf");
+            byte[] buffer = new byte[1024];
+            FileInputStream fis = null;
+            BufferedInputStream bis = null;
+            try {
+                fis = new FileInputStream(file);
+                bis = new BufferedInputStream(fis);
+                OutputStream os = response.getOutputStream();
+                int i = bis.read(buffer);
+                while (i != -1){
+                    os.write(buffer,0,i);
+                    i = bis.read(buffer);
+                }
+            } catch (IOException ex){
+
+            } finally {
+                if (bis != null){
+                    try {
+                        bis.close();
+                    } catch (IOException ex){
+
+                    }
+                }
+
+                if (fis != null){
+                    try {
+                        fis.close();
+                    } catch (IOException ex){};
+                }
+            }
+        }
     }
 
 
