@@ -76,7 +76,7 @@ public class MyAppContextInit implements WebApplicationInitializer {
 
 
 
-######2.3 实现AbstractDispatcherServletInitializer 配置servlet
+###### 2.3 实现AbstractDispatcherServletInitializer 配置servlet
 
 ```java
 public class WebApplicationInt extends AbstractDispatcherServletInitializer {
@@ -103,7 +103,7 @@ public class WebApplicationInt extends AbstractDispatcherServletInitializer {
 
 
 
-###3.DispatcherServlet 
+### 3.DispatcherServlet 
 
 > DispatcherServlet是前端控制器设计模式的实现，提供Spring Web MVC的集中访问点，而且负责职责的分派，而且与Spring IoC容器无缝集成，从而可以获得Spring的所有好处。
 >
@@ -138,7 +138,7 @@ public class WebApplicationInt extends AbstractDispatcherServletInitializer {
 
 
 
-######注册驱动
+###### 注册驱动
 
 ```xml
 <!-- spring 配置文件，注册MVC驱动 与 @EnableWebMvc 注解等效-->
@@ -376,7 +376,7 @@ public class DemoServlet extends HttpServlet{
 
 
 
-######6.1 @ResponseBody注解  处理输出报文
+###### 6.1 @ResponseBody注解  处理输出报文
 
 在**HandlerMapping**中**RequestMappingHandlerAdapter**执行`invoke(method)`的时候会对**Controller**中的返回值进行处理，处理的流程如下图：
 
@@ -384,13 +384,13 @@ public class DemoServlet extends HttpServlet{
 
 ![ResponseBody](https://ws4.sinaimg.cn/large/006tNc79gy1g3a5qpn6hqj30pk0iq76b.jpg)
 
-######6.2 @requestBody注解  处理请求报文
+###### 6.2 @requestBody注解  处理请求报文
 
 ![requestBody](https://ws4.sinaimg.cn/large/006tNc79gy1g3a8qkran4j30ov0ec75i.jpg)
 
 
 
-###7.ViewResolver
+### 7.ViewResolver
 
 > 把一个逻辑上的视图名称解析为一个真正的视图
 
@@ -485,7 +485,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 
 
-######8.1 ExceptionHandlerExceptionResolver
+###### 8.1 ExceptionHandlerExceptionResolver
 
 > 使用@ExceptionHandler注解的控制器都会被**ExceptionHandlerExceptionResolver**解析
 
@@ -619,7 +619,7 @@ public void login() throws UserNameNotMatchPasswordException {
 
 
 
-######8.4 实现HandlerExceptionResolver处理异常
+###### 8.4 实现HandlerExceptionResolver处理异常
 
 > 我们知道SpringMVC提供的这几个类都是实现了HandlerExceptionResolver接口来处理异常。
 >
@@ -643,7 +643,7 @@ public class ExceptionResolver implements HandlerExceptionResolver {
 
 
 
-###9.MultipartResolver
+### 9.MultipartResolver
 
 > 文件解析器，用于对客户端上传的文件进行解析。
 
@@ -728,7 +728,7 @@ public class OwnerController {
 
 
 
-######10.2 处理器方法
+###### 10.2 处理器方法
 
 1. 支持的方法参数
 
@@ -1009,7 +1009,7 @@ public class JobController {
 
 
 
-###12.PropertyEditor类型转换 
+### 12.PropertyEditor类型转换 
 
 > String - <T> 类型转换
 
@@ -1054,7 +1054,7 @@ public class JobController {
 
 
 
-######12.2 使用Spring内置的PropertyEditor 
+###### 12.2 使用Spring内置的PropertyEditor 
 
 直接使用
 
@@ -1159,7 +1159,7 @@ public class dateConvtore implements Converter<String,Date> {
 
 
 
-###14. 数据格式化
+### 14. 数据格式化
 
 > Formatter SPI核心是完成解析和格式化转换逻辑，在如Web应用/客户端项目中，需要解析、打印/展示本地化的对象值时使用
 
