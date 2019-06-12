@@ -106,7 +106,66 @@ ApplicationContext容器中，Bean的生命周期流程如上图所示，流程�
 @PreDestroy		// 注解destroy
 ```
 
+#####  3.4.1生命周期定制
 
+1. bean后处理器
+
+   ```java
+   @Component
+   public class AppBeanProcess implements BeanPostProcessor {
+       @Override
+       public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+           System.out.println("Before beanName = "+beanName);
+           return bean;
+       }
+
+       @Override
+       public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+           System.out.println("After beanName = "+beanName);
+           return bean;
+       }
+   }
+   ```
+
+   ​
+
+2. BeanNameAware、BeanFactoryAware、ApplicationContextAware、InitializingBean、PostConstruct
+
+   ```java
+   @Component
+   public class Animal implements ApplicationContextAware ,InitializingBean,BeanNameAware,BeanFactoryAware {
+
+       @Value("cat")
+       private String name;
+
+       @PostConstruct
+       public void init(){
+           System.out.println("animal 初始化");
+       }
+
+       @Override
+       public void afterPropertiesSet() throws Exception {
+           System.out.println("afterPropertiesSet - animal");
+       }
+
+       @Override
+       public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+           System.out.println("BeanFactory --- "+beanFactory);
+       }
+
+       @Override
+       public void setBeanName(String s) {
+           System.out.println("setBeanName --- "+s);
+       }
+
+       @Override
+       public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+           System.out.println("animal --- setApplicationContext");
+       }
+   }
+   ```
+
+   ​
 
 ####3.5 DI（依赖注入）
 
@@ -637,7 +696,7 @@ String str1 = new MessageFormat(rb.getString("greeting.common"),Locale. US).form
 ```
 
 ```java
-/
+
 ApplicationContext ctx = new ClassPathXmlApplicationContext("com...");  
 Object[] params = {"John", new GregorianCalendar().getTime()};  
 String str1 = ctx.getMessage("greeting.common",params,Locale.US);  
@@ -695,7 +754,7 @@ public class Hello implements MessageSourceAware {
 
 
 
-###7. `BeanFactory`和 `ApplicationContext`
+###7. BeanFactory和 ApplicationContext
 
 | 特征                             | BeanFactory | ApplicationContext |
 | -------------------------------- | ----------- | ------------------ |

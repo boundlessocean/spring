@@ -7,14 +7,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@EnableAutoConfiguration
 public class FristController {
     @RequestMapping("/")
     public String home(){
-        return "Hello world!";
-    }
-
-    public static void main(String[] args) throws Exception {
-        SpringApplication.run(FristController.class, args);
+        return "Hello";
     }
 }
