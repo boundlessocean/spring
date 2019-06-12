@@ -1,4 +1,5 @@
 import com.boundless.Bean.Animal;
+import com.boundless.Bean.AppObject;
 import com.boundless.Bean.Person;
 import com.boundless.config.AppConfig;
 import org.junit.Test;
@@ -15,6 +16,9 @@ public class AppTest {
 
         Animal cat = context.getBean(Animal.class);
         System.out.println(cat);
+
+        AppObject p1 = (AppObject)context.getBean(Person.class);
+        p1.run();
     }
 
 }

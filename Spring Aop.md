@@ -12,6 +12,14 @@
 >
 > Spring AOP也可以使用CGLIB代理。这是代理类而不是接口所必需的。默认情况下，如果业务对象未实现接口，则使用CGLIB。
 
+```xml
+<dependency>
+    <groupId>org.aspectj</groupId>
+    <artifactId>aspectjweaver</artifactId>
+    <version>1.8.9</version>
+</dependency>
+```
+
 
 
 ### 2.AOP组成部分
@@ -19,7 +27,7 @@
 #### 2.1 目标类
 
 ```java
-@Component("xiaowang")
+@Component()
 public class xiaowang {
     public void say(String name){
         System.out.println(name);
@@ -36,7 +44,7 @@ public class xiaowang {
 #### 2.2 切面
 
 ```java
-@Component("personaop")
+@Component()
 // 切面
 @Aspect
 public class PerosonAop {
@@ -137,11 +145,11 @@ public class AnimalImp implements Animal {
 }
 
 // 3.目标类
-@Component("xiaowang")
+@Component()
 public class xiaowang {}
 
 // 4.切面
-@Component("personaop")
+@Component()
 @Aspect
 public class PerosonAop {
 	@DeclareParents(value = "com.boundless.xiaowang",defaultImpl = AnimalImp.class)
