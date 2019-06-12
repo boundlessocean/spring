@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 
 @Component
-public class Animal implements ApplicationContextAware ,InitializingBean,BeanNameAware,BeanFactoryAware {
+public class Animal implements  InitializingBean,BeanNameAware,BeanFactoryAware {
 
     @Value("Lucy")
     private String name;
@@ -37,10 +37,5 @@ public class Animal implements ApplicationContextAware ,InitializingBean,BeanNam
     @Override
     public void setBeanName(String s) {
         System.out.println("setBeanName --- "+s);
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        System.out.println("animal --- setApplicationContext");
     }
 }

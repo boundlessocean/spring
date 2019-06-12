@@ -5,6 +5,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -14,18 +15,20 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 @Component()
-public class Person implements ApplicationContextAware ,InitializingBean ,BeanFactoryAware,BeanNameAware {
+public class Person implements  InitializingBean ,BeanFactoryAware,BeanNameAware {
 
     @Value("Lucy")
     private String name;
     @Value("20")
     private int age;
 
+    @Autowired
     private ApplicationContext context;
 
     @PostConstruct
     public void init(){
         System.out.println("person - 初始化");
+        System.out.println("context - "+context);
     }
 
 
@@ -35,11 +38,11 @@ public class Person implements ApplicationContextAware ,InitializingBean ,BeanFa
     }
 
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        System.out.println("setApplicationContext");
-        context = applicationContext;
-    }
+//    @Override
+//    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+//        System.out.println("setApplicationContext");
+//        context = applicationContext;
+//    }
 
 
     @Override
