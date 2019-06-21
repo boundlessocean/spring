@@ -103,7 +103,7 @@ public class WebApplicationInt extends AbstractDispatcherServletInitializer {
 
 
 
-### 3.DispatcherServlet 
+### 3.DispatcherServlet  
 
 > DispatcherServlet是前端控制器设计模式的实现，提供Spring Web MVC的集中访问点，而且负责职责的分派，而且与Spring IoC容器无缝集成，从而可以获得Spring的所有好处。
 >
@@ -489,7 +489,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 > 使用@ExceptionHandler注解的控制器都会被**ExceptionHandlerExceptionResolver**解析
 
-而@ExceptionHandler注解方法的控制器，只能接受当前控制器的异常处理，所以我们要配合@ControllerAdvice注解做到全局处理异常。
+而@ExceptionHandler注解方法的控制器，只能接受当前控制器的异常处理，所以我们要配合@ControllerAdvice注解做到全局处理异常。（**如果@ControllerAdvice(xxx.class) 表明ControllerAdvice只作用于xxx类**）
 
 ```java
 @ControllerAdvice
@@ -1169,55 +1169,89 @@ public class dateConvtore implements Converter<String,Date> {
 
 ### 15.拦截器
 
-1. 实现HandlerInterceptor接口
+1. HandlerInterceptor
 
-```java
-public class myInterceptor implements HandlerInterceptor {
-    // 拦截请求
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        System.out.println("HttpServletRequest");
-        request.setAttribute("name","zhangsan");
-        return true;
-    }
+   > interceptor动态拦截Action调用的对象，在service或者其他方法前后调用一个方法进行处理。采用了java动态代理和反射的机制来实现，与servlet无关
 
-    // 向客户端返回数据之前调用
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        System.out.println("postHandle");
-    }
+   ```java
+   public class myInterceptor implements HandlerInterceptor {
+       // 拦截请求
+       @Override
+       public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+           System.out.println("HttpServletRequest");
+           request.setAttribute("name","zhangsan");
+           return true;
+       }
 
-    // 向客户端返回数据之后调用
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        System.out.println("afterCompletion");
-    }
-}
-```
+       // 向客户端返回数据之前调用
+       @Override
+       public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+           System.out.println("postHandle");
+       }
+
+       // 向客户端返回数据之后调用
+       @Override
+       public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+           System.out.println("afterCompletion");
+       }
+   }
+   ```
+
+   ```Xml
+   <mvc:interceptors>
+       <mvc:interceptor>
+           <mvc:mapping path="/**"/>
+           <bean id="myInterceptor" class="com.boundless.myInterceptor"/>
+       </mvc:interceptor>
+   </mvc:interceptors>
+   ```
+
+   ```java
+   @Configuration
+   @EnableWebMvc
+   public class WebConfig implements WebMvcConfigurer {
+       @Override
+       public void addInterceptors(InterceptorRegistry registry) {
+           registry.addInterceptor(new myInterceptor()).addPathPatterns("/**");
+       }
+   }
+   ```
+
+   ​
+
+2. Filter
+
+   > 对用户请求进行预处理
+
+   ```java
+   @Component
+   @WebFilter(filterName = "myFilter",urlPatterns = "/*")
+   public class MyFilter implements Filter {
+       public void init(FilterConfig filterConfig) throws ServletException {
+           System.out.println(">>>>>>myFilter init ……");
+       }
+
+       public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+           System.out.println(">>>>>>执行过滤操作");
+           filterChain.doFilter(servletRequest, servletResponse);
+       }
+
+       public void destroy() {
+           System.out.println(">>>>>>myFilter destroy ……");
+       }
+   }
+   ```
 
 
 
-2. 注册拦截器
+3. Listener
 
-```xml
-<mvc:interceptors>
-    <mvc:interceptor>
-        <mvc:mapping path="/**"/>
-        <bean id="myInterceptor" class="com.boundless.myInterceptor"/>
-    </mvc:interceptor>
-</mvc:interceptors>
-```
-
-```java
-@Configuration
-@EnableWebMvc
-public class WebConfig implements WebMvcConfigurer {
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new myInterceptor()).addPathPatterns("/**");
-    }
-}
-```
+   > 监听web应用内部各种事件并做出处理
+   >
+   > 1. ServletContextListener
+   > 2. HttpSessionListner
+   > 3. ServletRequestListner
+   > 4. ApplicationListener
 
 
 
@@ -1242,4 +1276,38 @@ public class WebConfig implements WebMvcConfigurer {
     location="/static/"
     cache-period="31556926" />
 ```
+
+
+
+### 17. 内容协商
+
+![contentNegotiation](https://ws3.sinaimg.cn/large/006tNc79gy1g46jnboyrpj312a0p811k.jpg)
+
+
+
+### 18. 跨域
+
+1. 注解
+
+   ```java
+   @CrossOrigin(*)
+   ```
+
+   ​
+
+2. App配置
+
+   ```java
+   @Configuration
+   @ComponentScan(basePackages = "com.controller")
+   public class AppConfig implements WebMvcConfigurer {
+
+       @Override
+       public void addCorsMappings(CorsRegistry registry) {
+           registry.addMapping("/**").allowedOrigins("*");
+       }
+   }
+   ```
+
+   ​
 

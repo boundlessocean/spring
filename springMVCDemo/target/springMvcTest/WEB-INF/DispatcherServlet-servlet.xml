@@ -65,7 +65,7 @@
 
 
         <!--设置静态资源不过滤-->
-        <mvc:resources mapping="/job/file"
+        <mvc:resources mapping="**"
                        location="/css/"
                        cache-period="31556926" />
         <!--<mvc:resources mapping="WEB-INF/page/**" location="WEB-INF/page/"/>-->

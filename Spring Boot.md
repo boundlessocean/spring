@@ -187,6 +187,25 @@ public class AppExit implements ExitCodeGenerator {
 
 
 
+### 4.SpringApplication运行阶段
+
+```java
+public SpringApplication(ResourceLoader resourceLoader, Class<?>... primarySources) {
+    this.resourceLoader = resourceLoader;
+    Assert.notNull(primarySources, "PrimarySources must not be null");
+    // 1.配置bean的来源，java配置类（xml）
+    this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
+    // 2.推断应用类型 NONE,SERVLET,REACTIVE
+    this.webApplicationType = deduceWebApplicationType();
+    // 3.利用工厂机制加载两种实例（Initializers、Listeners）
+    setInitializers((Collection) getSpringFactoriesInstances(
+            ApplicationContextInitializer.class));
+    setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
+    // 4.推断主类
+    this.mainApplicationClass = deduceMainApplicationClass();
+}
+```
+
 
 
 
