@@ -340,3 +340,15 @@ public class AppConfig implements WebMvcConfigurer {
        private String id;
    }
    ```
+
+
+
+### 8. spring.factories
+
+```
+org.springframework.boot.SpringApplicationRunListener=\
+com.controller.Config.AppRunner
+
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.controller.Config.AppEnvironmentProcessor
+```
