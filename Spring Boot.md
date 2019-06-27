@@ -81,11 +81,33 @@ public class Application {
   </build>
   ```
 
-  ​
 
 
 
-### 2.自定义Bannar
+
+### 2.SpringApplication运行阶段
+
+```java
+public SpringApplication(ResourceLoader resourceLoader, Class<?>... primarySources) {
+    this.resourceLoader = resourceLoader;
+    Assert.notNull(primarySources, "PrimarySources must not be null");
+    // 1.配置bean的来源，java配置类（xml）
+    this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
+    // 2.推断应用类型 NONE,SERVLET,REACTIVE
+    this.webApplicationType = deduceWebApplicationType();
+    // 3.利用工厂机制加载两种实例（Initializers、Listeners）
+    setInitializers((Collection) getSpringFactoriesInstances(
+            ApplicationContextInitializer.class));
+    setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
+    // 4.推断主类
+    this.mainApplicationClass = deduceMainApplicationClass();
+}
+```
+
+
+
+
+###  3.自定义Bannar
 
 > 通过在classpath下添加一个banner.txt或设置banner.location来指定相应的文件可以改变启动过程中打印的banner.
 
@@ -114,7 +136,7 @@ new SpringApplicationBuilder()
 
 
 
-###  3.Application事件和监听器
+###   4.Application事件和监听器
 
 
 
@@ -185,75 +207,136 @@ public class AppExit implements ExitCodeGenerator {
 
 
 
+### 5.@Enable自动装配
+
+> SpringBoot 总要的配置就是自动装配，比如@EnableAutoConfiguration。我们同样可以自定义自动装配
 
 
-### 4.SpringApplication运行阶段
+
+1. 直接装配
+
+   > 通过@Import(x.class)、直接装配Class
+
+   ```java
+   @Retention(RetentionPolicy.RUNTIME)
+   @Target(ElementType.TYPE)
+   @Documented
+   @Import(HelloWorldConfiguration.class) 
+   public @interface EnableHelloWorld {
+
+   }
+   ```
+
+   ```Java
+   @Configuration
+   public class HelloWorldConfiguration {
+       @Bean
+       public String helloWorld(){
+           return "hello world,2019";
+       }
+   }
+   ```
+
+   ​
+
+
+2. 接口装配
+
+   > 通过实现 `ImportSelector`接口、根据逻辑判断装配的Class
+
+   ```java
+   @Retention(RetentionPolicy.RUNTIME)
+   @Target(ElementType.TYPE)
+   @Documented
+   @Import(HelloWorldSelector.class)
+   public @interface EnableHelloWorld {
+
+   }
+   ```
+
+   ```java
+   public class HelloWorldSelector implements ImportSelector {
+       @Override
+       public String[] selectImports(AnnotationMetadata annotationMetadata) {
+           return new String[] {HelloWorldConfiguration.class.getName()};
+       }
+   }
+   ```
+
+   ​
+
+
+### 6.跨域
 
 ```java
-public SpringApplication(ResourceLoader resourceLoader, Class<?>... primarySources) {
-    this.resourceLoader = resourceLoader;
-    Assert.notNull(primarySources, "PrimarySources must not be null");
-    // 1.配置bean的来源，java配置类（xml）
-    this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
-    // 2.推断应用类型 NONE,SERVLET,REACTIVE
-    this.webApplicationType = deduceWebApplicationType();
-    // 3.利用工厂机制加载两种实例（Initializers、Listeners）
-    setInitializers((Collection) getSpringFactoriesInstances(
-            ApplicationContextInitializer.class));
-    setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
-    // 4.推断主类
-    this.mainApplicationClass = deduceMainApplicationClass();
+public class AppConfig implements WebMvcConfigurer {
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**").allowedOrigins("*");
+    }
 }
 ```
 
 
 
+### 7.Environment
+
+1. 使用@ConfigurationProperties装配实体类
+
+   ```
+   user.id = 20
+   user.name = zhangshan
+   user.city.code = 200
+   user.city.address = ssssss
+   ```
+
+   ```java
+   @ConfigurationProperties(prefix = "user")
+   public class User {
+       private String id;
+       private String name;
+       private City city;
+   }
+   ```
+
+   ```java
+   @EnableConfigurationProperties(User.class)
+   public class AppConfig implements WebMvcConfigurer {}
+   ```
+
+   ​
 
 
 
+2. 使用Environment获取
+
+   ```java
+   public static void main(String[] args){
+           ConfigurableApplicationContext context = new SpringApplicationBuilder(AppConfig.class)
+                   .web(WebApplicationType.NONE)
+                   .properties("user.id=99")
+                   .run(args);
+   	System.out.println(context.getEnvironment().getProperty("user.id"));
+   }
+   ```
+
+   ​
+
+3. 使用 @Value获取
+
+   ```java
+   @Value("${user.id}")
+   private String id;
+   ```
 
 
 
+4. TestPropertySource 单元测试
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<https://qbgbook.gitbooks.io/spring-boot-reference-guide-zh/content/II.%20Getting%20started/10.1.1.%20Maven%20installation.html>
-
-
-
-
-
-<https://www.breakyizhan.com/springboot/3033.html>
-
-
-
-
-
-<https://docs.spring.io/spring-boot/docs/2.1.4.RELEASE/reference/htmlsingle/#boot-features-external-config-validation>
+   ```java
+   @TestPropertySource(properties = "user.id=10")
+   public class MyTest {
+       @Value("${user.id}")
+       private String id;
+   }
+   ```

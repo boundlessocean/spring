@@ -12,5 +12,9 @@ com.controller.ApplicationContext.AfterHelloWorldAppContextInitializer,\
 com.controller.ApplicationContext.HelloWorldAppContextInitializer
 
 #应用运行监听
-org.springframework.boot.SpringApplicationRunListener=\
-com.controller.Config.AppRunner
+#org.springframework.boot.SpringApplicationRunListener=\
+#com.controller.Config.AppRunner
+
+
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.controller.Config.AppEnvironmentProcessor

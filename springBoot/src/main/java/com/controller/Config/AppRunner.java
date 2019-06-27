@@ -24,7 +24,7 @@ public class AppRunner implements SpringApplicationRunListener {
 
     @Override
     public void starting() {
-
+        System.out.println("---------   starting");
     }
 
     @Override
@@ -35,12 +35,17 @@ public class AppRunner implements SpringApplicationRunListener {
 //        MapPropertySource mapPropertySource = new MapPropertySource("custom_Properties",map);
 //
 //        MutablePropertySources sources = environment.getPropertySources();
-//        sources.addFirst(mapPropertySource);
+//        sources.addFirst(mapPropertySource );
     }
 
     @Override
     public void contextPrepared(ConfigurableApplicationContext context) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("user.id","45");
+        MapPropertySource mapPropertySource = new MapPropertySource("custom_Properties",map);
 
+        MutablePropertySources sources = context.getEnvironment().getPropertySources();
+        sources.addFirst(mapPropertySource );
     }
 
     @Override

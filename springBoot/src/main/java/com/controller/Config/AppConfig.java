@@ -19,11 +19,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.file.Path;
 @EnableAutoConfiguration
-
 
 @EnableConfigurationProperties(User.class)
 //@ConditionalOnProperty(name = "user.city.code",matchIfMissing = false,havingValue = "200")
